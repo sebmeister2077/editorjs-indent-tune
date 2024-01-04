@@ -58,9 +58,6 @@ export default class IndentTune {
             'keydown',
             (e) => {
                 if (e.key !== 'Tab') return
-                const activeBlockName = this.api.blocks.getBlockByIndex(this.api.blocks.getCurrentBlockIndex())?.name
-                //ignore paragraph list since it has its internal function for this
-                if (activeBlockName === 'paragraphList') return
                 e.stopPropagation()
                 e.preventDefault()
 
