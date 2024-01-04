@@ -1,3 +1,5 @@
+import { LEFT_ARROW_ICON, RIGHT_ARROW_ICON } from './icons.js'
+
 export default class IndentTune {
     static get isTune() {
         return true
@@ -103,7 +105,7 @@ export default class IndentTune {
 
         this.wrapper.style.paddingLeft = `${this.data.indentLevel * this.config.indentSize}px`
 
-        //disable tune
+        // disable tune
         this.getTuneByName(`${this.TuneNames.indent}-${this.block.id}`)?.classList.remove(this.CSS.disabledItem)
         if (this.data.indentLevel == 0)
             this.getTuneByName(`${this.TuneNames.unindent}-${this.block.id}`)?.classList.add(this.CSS.disabledItem)
