@@ -8,8 +8,11 @@ export default class IndentTune {
     constructor({ api, data, config, block }) {
         this.api = api
         this.block = block
-        this.config = { indentSize: 24, maxIndent: 8, ...(config ?? {}) }
+        this.config = { indentSize: 24, maxIndent: 8, multiblock: false, tuneName: null, ...(config ?? {}) }
         this.data = { indentLevel: 0, ...(data ?? {}) }
+
+        if (multiblock && !tuneName)
+            console.error("IndentTune config 'tuneName' was not provided, this is required for multiblock option to work.")
     }
 
     // prepare?(): void | Promise<void> {
@@ -75,8 +78,32 @@ export default class IndentTune {
                 e.stopPropagation()
                 e.preventDefault()
 
-                if (e.shiftKey) this.unIndentBlock()
-                else this.indentBlock()
+                const isIndent = !e.shiftKey
+                const blocks = this.getGlobalSelectedBlocks()
+
+                if (!this.config.multiblock || blocks.length < 2) {
+                    if (isIndent) this.indentBlock()
+                    else this.unIndentBlock()
+                    return
+                }
+
+                blocks.forEach(async (b) => {
+                    //get block indent level
+                    const savedData = await b.save()
+                    if (!savedData) return
+
+                    //this somehow SAVES fine
+                    if (isIndent)
+                        savedData.tunes.indentTune.indentLevel = Math.min(MAX_INDENT, (savedData.tunes.indentTune.indentLevel ?? 0) + 1)
+                    else savedData.tunes.indentTune.indentLevel = Math.max(0, (savedData.tunes.indentTune.indentLevel ?? 0) - 1)
+                    b.dispatchChange()
+
+                    //apply visual feedback manually, since we can't make the tune update on other blocks
+                    const blockWrapper = this.getWrapperBlockById(b.id)
+                    if (blockWrapper instanceof HTMLElement) {
+                        this.applyStylesToWrapper(blockWrapper, savedData.tunes.indentTune.indentLevel)
+                    }
+                })
             },
             { capture: true },
         )
@@ -104,7 +131,7 @@ export default class IndentTune {
         if (!this.wrapper) return
         this.data.indentLevel = Math.min(this.data.indentLevel + 1, this.config.maxIndent)
 
-        this.wrapper.style.paddingLeft = `${this.data.indentLevel * this.config.indentSize}px`
+        this.applyStylesToWrapper(this.wrapper)
 
         //disable tune
         this.getTuneByName(`${this.TuneNames.unindent}-${this.block.id}`)?.classList.remove(this.CSS.disabledItem)
@@ -116,7 +143,7 @@ export default class IndentTune {
         if (!this.wrapper) return
         this.data.indentLevel = Math.max(this.data.indentLevel - 1, 0)
 
-        this.wrapper.style.paddingLeft = `${this.data.indentLevel * this.config.indentSize}px`
+        this.applyStylesToWrapper(this.wrapper)
 
         // disable tune
         this.getTuneByName(`${this.TuneNames.indent}-${this.block.id}`)?.classList.remove(this.CSS.disabledItem)
@@ -130,6 +157,34 @@ export default class IndentTune {
      */
     getTuneByName(name) {
         return document.querySelector(`.${this.CSS.popoverItem}[data-item-name=${name}]`)
+    }
+
+    /**
+     *
+     * @param {HTMLElement} wrapper
+     * @param {number} indentLevel
+     */
+    applyStylesToWrapper(wrapper, indentLevel) {
+        wrapper.style.paddingLeft = `${indentLevel * this.config.indentSize}px`
+    }
+
+    /**
+     * @returns {BlockAPI[]}
+     */
+    getGlobalSelectedBlocks() {
+        const crossSelectedBlocks = new Array(this.api.blocks.getBlocksCount())
+            .fill(0)
+            .map((_, idx) => this.api.blocks.getBlockByIndex(idx))
+            .filter((b) => !!b?.selected)
+        return crossSelectedBlocks
+    }
+
+    /**
+     * @param {string} blockId
+     * @returns {HTMLElement | null}
+     */
+    getWrapperBlockById(blockId) {
+        return document.querySelector(`.ce-block[data-id="${blockId}"] [${WRAPPER_NAME}]`)
     }
 
     save() {
