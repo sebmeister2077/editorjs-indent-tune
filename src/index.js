@@ -1,12 +1,3 @@
-import { API, BlockAPI, BlockTune, BlockTuneConstructable, SanitizerConfig } from '@editorjs/editorjs'
-import { BlockTuneData } from '@editorjs/editorjs/types/block-tunes/block-tune-data'
-import { ToolConstructable, TunesMenuConfig } from '@editorjs/editorjs/types/tools'
-//@ts-ignore
-import Shortcut from '@codexteam/shortcuts'
-import { LEFT_ARROW_ICON, RIGHT_ARROW_ICON } from './icons'
-
-const INDENT_STEP = 30
-const MAX_INDENT = 8
 export default class IndentTune {
     static get isTune() {
         return true
@@ -30,7 +21,7 @@ export default class IndentTune {
     render() {
         //Disable items after they are rendered synchronously
         setTimeout(() => {
-            if (this.data.indentLevel == MAX_INDENT)
+            if (this.data.indentLevel == this.config.maxIndent)
                 this.getTuneByName(`${this.TuneNames.indent}-${this.block.id}`)?.classList.add(this.CSS.disabledItem)
             if (this.data.indentLevel == 0)
                 this.getTuneByName(`${this.TuneNames.unindent}-${this.block.id}`)?.classList.add(this.CSS.disabledItem)
@@ -59,7 +50,7 @@ export default class IndentTune {
     wrap(pluginsContent) {
         this.wrapper = document.createElement('div')
         this.wrapper.appendChild(pluginsContent)
-        this.wrapper.style.paddingLeft = `${this.data.indentLevel * INDENT_STEP}px`
+        this.wrapper.style.paddingLeft = `${this.data.indentLevel * this.config.indentSize}px`
 
         this.wrapper.addEventListener(
             'keydown',
@@ -96,13 +87,13 @@ export default class IndentTune {
 
     indentBlock() {
         if (!this.wrapper) return
-        this.data.indentLevel = Math.min(this.data.indentLevel + 1, MAX_INDENT)
+        this.data.indentLevel = Math.min(this.data.indentLevel + 1, this.config.maxIndent)
 
-        this.wrapper.style.paddingLeft = `${this.data.indentLevel * INDENT_STEP}px`
+        this.wrapper.style.paddingLeft = `${this.data.indentLevel * this.config.indentSize}px`
 
         //disable tune
         this.getTuneByName(`${this.TuneNames.unindent}-${this.block.id}`)?.classList.remove(this.CSS.disabledItem)
-        if (this.data.indentLevel == MAX_INDENT)
+        if (this.data.indentLevel == this.config.maxIndent)
             this.getTuneByName(`${this.TuneNames.indent}-${this.block.id}`)?.classList.add(this.CSS.disabledItem)
     }
 
@@ -110,7 +101,7 @@ export default class IndentTune {
         if (!this.wrapper) return
         this.data.indentLevel = Math.max(this.data.indentLevel - 1, 0)
 
-        this.wrapper.style.paddingLeft = `${this.data.indentLevel * INDENT_STEP}px`
+        this.wrapper.style.paddingLeft = `${this.data.indentLevel * this.config.indentSize}px`
 
         //disable tune
         this.getTuneByName(`${this.TuneNames.indent}-${this.block.id}`)?.classList.remove(this.CSS.disabledItem)
