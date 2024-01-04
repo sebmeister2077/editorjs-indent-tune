@@ -93,9 +93,10 @@ export default class IndentTune {
                     if (!savedData) return
 
                     //this somehow SAVES fine
-                    if (isIndent)
-                        savedData.tunes.indentTune.indentLevel = Math.min(MAX_INDENT, (savedData.tunes.indentTune.indentLevel ?? 0) + 1)
-                    else savedData.tunes.indentTune.indentLevel = Math.max(0, (savedData.tunes.indentTune.indentLevel ?? 0) - 1)
+                    const tune = savedData.tunes[this.config.tuneName]
+                    console.assert(Boolean(tune), `'tuneName' is invalid, no tune was found for block ${b.name}`)
+                    if (isIndent) tune.indentLevel = Math.min(MAX_INDENT, (tune.indentLevel ?? 0) + 1)
+                    else tune.indentLevel = Math.max(0, (tune.indentLevel ?? 0) - 1)
                     b.dispatchChange()
 
                     //apply visual feedback manually, since we can't make the tune update on other blocks
