@@ -1,0 +1,20 @@
+.ce-popover-item-custom:hover {
+    background-color: transparent !important;
+}
+
+.ce-popover-item-custom .ce-popover-item__icon {
+    will-change: background-color;
+    transition: 0.3s background-color;
+    padding-block: 0px;
+    padding-inline: 0px;
+    border-width: 0px;
+}
+
+.ce-popover-item-custom:hover .ce-popover-item__icon {
+    box-shadow: 0 0 0 1px var(--color-border-icon, rgba(201, 201, 204, .48)) !important;
+    -webkit-box-shadow: 0 0 0 1px var(--color-border-icon, rgba(201, 201, 204, .48)) !important;
+}
+
+.ce-popover-item-custom .ce-popover-item__icon:hover {
+    background-color: var(--color-background-item-hover, #eff2f5);
+}

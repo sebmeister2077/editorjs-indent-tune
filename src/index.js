@@ -29,6 +29,20 @@ export default class IndentTune {
                 this.getTuneByName(`${this.TuneNames.unindent}-${this.block.id}`)?.classList.add(this.CSS.disabledItem)
         }, 0)
 
+        const html = /*html*/ `
+			<div class="${this.CSS.popoverItem}" data-item-name='indent'>
+				<button class="${this.CSS.popoverItemIcon}" data-unindent>${LEFT_ARROW_ICON}</button>
+				<div class="${this.CSS.popoverItemTitle}">Indent</div>
+				<button class="${this.CSS.popoverItemIcon}" data-indent style="margin-left:10px;">${RIGHT_ARROW_ICON}</button>
+			</div>
+		`
+
+        const item = new DOMParser().parseFromString(html, 'text/html').body.firstChild
+
+        item.querySelector('[data-indent]')?.addEventListener('click', () => this.indentBlock())
+        item.querySelector('[data-unindent]')?.addEventListener('click', () => this.unIndentBlock())
+
+        return item
         return [
             {
                 title: 'Indent',
@@ -72,7 +86,9 @@ export default class IndentTune {
 
     get CSS() {
         return {
-            popoverItem: 'ce-popover-item',
+            popoverItem: 'ce-popover-item ce-popover-item-custom',
+            popoverItemIcon: 'ce-popover-item__icon',
+            popoverItemTitle: 'ce-popover-item__title',
             disabledItem: 'ce-popover-item--disabled',
         }
     }
