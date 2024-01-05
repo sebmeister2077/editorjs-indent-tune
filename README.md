@@ -2,7 +2,7 @@
 
 You can add indentation to any block.
 
-![readme](./assets/example2.gif)
+![readme](./assets/example1.gif)
 
 ## How to use
 
