@@ -74,8 +74,8 @@ export default class IndentTune implements BlockTune {
     public render(): HTMLElement | TunesMenuConfig {
         //Disable items after they are rendered synchronously
         setTimeout(() => {
-            if (this.data.indentLevel == this.config.maxIndent) this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
-            if (this.data.indentLevel == 0) this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
+            if (this.data.indentLevel == this.maxIndent) this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
+            if (this.data.indentLevel == this.minIndent) this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
         }, 0)
 
         if (this.config.orientation === 'vertical')
@@ -194,28 +194,34 @@ export default class IndentTune implements BlockTune {
         return this.config.customBlockIndentLimits[this.block.name] ?? {}
     }
 
+    private get maxIndent() {
+        return this.customInterval.max ?? this.config.maxIndent
+    }
+
+    private get minIndent() {
+        return this.customInterval.min ?? this.config.minIndent
+    }
+
     private indentBlock() {
         if (!this.wrapper) return
-        const maxIndent = this.customInterval.max ?? this.config.maxIndent
-        this.data.indentLevel = Math.min(this.data.indentLevel + 1, maxIndent)
+        this.data.indentLevel = Math.min(this.data.indentLevel + 1, this.maxIndent)
 
         this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
 
         //disable tune
         this.getTuneButton('unindent')?.classList.remove(this.CSS.disabledItem)
-        if (this.data.indentLevel === maxIndent) this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
+        if (this.data.indentLevel === this.maxIndent) this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
     }
 
     private unIndentBlock() {
         if (!this.wrapper) return
-        const minIndent = this.customInterval.min ?? this.config.minIndent
-        this.data.indentLevel = Math.max(this.data.indentLevel - 1, minIndent)
+        this.data.indentLevel = Math.max(this.data.indentLevel - 1, this.minIndent)
 
         this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
 
         // disable tune
         this.getTuneButton('indent')?.classList.remove(this.CSS.disabledItem)
-        if (this.data.indentLevel === minIndent) this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
+        if (this.data.indentLevel === this.minIndent) this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
     }
 
     private getTuneButton(indentType: 'indent' | 'unindent') {

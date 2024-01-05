@@ -33,6 +33,8 @@ export default class IndentTune implements BlockTune {
     private get CSS();
     private get TuneNames();
     private get customInterval();
+    private get maxIndent();
+    private get minIndent();
     private indentBlock;
     private unIndentBlock;
     private getTuneButton;
