@@ -10,6 +10,11 @@
     border-width: 0px;
     color: var(--color-text-primary, black);
 }
+
+.ce-popover-item-custom .ce-popover-item--disabled {
+    color: var(--color-text-secondary, #707684);
+}
+
 .ce-popover-item-custom .ce-popover-item__icon:focus {
     outline: none;
 }

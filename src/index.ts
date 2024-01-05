@@ -191,29 +191,31 @@ export default class IndentTune implements BlockTune {
     }
 
     private get customInterval() {
-        return this.config.customBlockIndentLimits[this.block.name]
+        return this.config.customBlockIndentLimits[this.block.name] ?? {}
     }
 
     private indentBlock() {
         if (!this.wrapper) return
-        this.data.indentLevel = Math.min(this.data.indentLevel + 1, this.customInterval.max ?? this.config.maxIndent)
+        const maxIndent = this.customInterval.max ?? this.config.maxIndent
+        this.data.indentLevel = Math.min(this.data.indentLevel + 1, maxIndent)
 
         this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
 
         //disable tune
         this.getTuneButton('unindent')?.classList.remove(this.CSS.disabledItem)
-        if (this.data.indentLevel == this.config.maxIndent) this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
+        if (this.data.indentLevel === maxIndent) this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
     }
 
     private unIndentBlock() {
         if (!this.wrapper) return
-        this.data.indentLevel = Math.max(this.data.indentLevel - 1, this.customInterval.min ?? this.config.minIndent)
+        const minIndent = this.customInterval.min ?? this.config.minIndent
+        this.data.indentLevel = Math.max(this.data.indentLevel - 1, minIndent)
 
         this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
 
         // disable tune
         this.getTuneButton('indent')?.classList.remove(this.CSS.disabledItem)
-        if (this.data.indentLevel == 0) this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
+        if (this.data.indentLevel === minIndent) this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
     }
 
     private getTuneButton(indentType: 'indent' | 'unindent') {
