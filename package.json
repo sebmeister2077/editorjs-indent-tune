@@ -1,10 +1,9 @@
 {
     "name": "editorjs-block-indent-blocktune",
-    "version": "0.2.7",
+    "version": "0.2.9",
     "description": "Block tune for Editor.js ",
     "scripts": {
         "build": "webpack --mode production",
-        "build:hi": "webpack",
         "build:dev": "webpack --mode development --watch --output-filename=dev-build.js"
     },
     "devDependencies": {
@@ -23,7 +22,8 @@
     "main": "./dist/bundle.js",
     "types": "./dist/index.d.ts",
     "files": [
-        "src/*"
+        "src/*",
+        "dist/*"
     ],
     "author": "sebmeister2077",
     "license": "MIT",
