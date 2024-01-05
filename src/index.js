@@ -30,7 +30,7 @@ export default class IndentTune {
             if (this.data.indentLevel == 0) this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
         }, 0)
 
-        if (this.config.orientation === 'horizontal')
+        if (this.config.orientation === 'vertical')
             return [
                 {
                     title: 'Indent',
