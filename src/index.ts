@@ -6,6 +6,7 @@ const WRAPPER_NAME = 'data-block-indent-wrapper'
 require('./index.css').toString()
 export type IndentTuneConfig = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
     orientation: 'horizontal' | 'vertical'
+    customBlockIndentLimits: Record<string, Partial<Record<'min' | 'max', number>>>
 } & (
         | {
               tuneName: string
@@ -39,14 +40,17 @@ export default class IndentTune implements BlockTune {
             multiblock: false,
             tuneName: null,
             orientation: 'horizontal',
+            customBlockIndentLimits: {},
         }
         this.config = {
             ...defaultConfig,
             ...(config ?? {}),
         }
+
+        const defaultIndentLevel = this.config.customBlockIndentLimits[this.block.name]?.min ?? this.config.minIndent
         this.data = {
             //@ts-ignore
-            indentLevel: 0,
+            indentLevel: defaultIndentLevel,
             ...(data ?? {}),
         }
 
@@ -81,30 +85,7 @@ export default class IndentTune implements BlockTune {
                     name: `${this.TuneNames.unindent}-${this.block.id}`,
                 },
             ]
-        // this.styles = document.createElement('style')
-        // ;(this.styles.innerHTML = /*css*/ `
-        //         .${this.CSS.customPopoverItem}:hover {
-        //             background-color: transparent !important;
-        //         }
 
-        //         .${this.CSS.customPopoverItem} .${this.CSS.popoverItemIcon} {
-        //             will-change: background-color;
-        //             transition: 0.3s background-color;
-        //             padding-block: 0px;
-        //             padding-inline: 0px;
-        //             border-width: 0px;
-        //         }
-
-        //         .${this.CSS.customPopoverItem}:hover .${this.CSS.popoverItemIcon} {
-        //             box-shadow: 0 0 0 1px var(--color-border-icon, rgba(201, 201, 204, .48)) !important;
-        //             -webkit-box-shadow: 0 0 0 1px var(--color-border-icon, rgba(201, 201, 204, .48)) !important;
-        //         }
-
-        //         .${this.CSS.customPopoverItem} .${this.CSS.popoverItemIcon}:hover {
-        //             background-color: var(--color-background-item-hover, #eff2f5);
-        //         }
-        // `),
-        //     document.body.appendChild(this.styles)
         const html = /*html*/ `
 			<div class="${this.CSS.popoverItem} ${this.CSS.customPopoverItem}" data-item-name='indent'>
 				<button class="${this.CSS.popoverItemIcon}" data-unindent>${LEFT_ARROW_ICON}</button>
@@ -195,9 +176,13 @@ export default class IndentTune implements BlockTune {
         }
     }
 
+    private get customInterval() {
+        return this.config.customBlockIndentLimits[this.block.name]
+    }
+
     private indentBlock() {
         if (!this.wrapper) return
-        this.data.indentLevel = Math.min(this.data.indentLevel + 1, this.config.maxIndent)
+        this.data.indentLevel = Math.min(this.data.indentLevel + 1, this.customInterval.max ?? this.config.maxIndent)
 
         this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
 
@@ -208,7 +193,7 @@ export default class IndentTune implements BlockTune {
 
     private unIndentBlock() {
         if (!this.wrapper) return
-        this.data.indentLevel = Math.max(this.data.indentLevel - 1, 0)
+        this.data.indentLevel = Math.max(this.data.indentLevel - 1, this.customInterval.min ?? this.config.minIndent)
 
         this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
 
