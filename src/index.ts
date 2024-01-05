@@ -4,7 +4,9 @@ import { LEFT_ARROW_ICON, RIGHT_ARROW_ICON } from './icons'
 const WRAPPER_NAME = 'data-block-indent-wrapper'
 
 require('./index.css').toString()
-export type IndentTuneConfig = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
+
+export type IndentTuneConfig = Partial<IndentTuneConfigOptions>
+export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
     orientation: 'horizontal' | 'vertical'
     customBlockIndentLimits: Record<string, Partial<Record<'min' | 'max', number>>>
 } & (
@@ -26,14 +28,14 @@ export default class IndentTune implements BlockTune {
 
     private api: API
     private block: BlockAPI
-    private config: IndentTuneConfig
+    private config: IndentTuneConfigOptions
     public data: IndentData
     private wrapper: HTMLElement | null = null
-    constructor({ api, data, config, block }: BlockToolConstructorOptions<IndentData, IndentTuneConfig>) {
+    constructor({ api, data, config, block }: BlockToolConstructorOptions<IndentData, IndentTuneConfigOptions>) {
         this.api = api
         this.block = block!
 
-        const defaultConfig: IndentTuneConfig = {
+        const defaultConfig: IndentTuneConfigOptions = {
             indentSize: 24,
             maxIndent: 8,
             minIndent: 0,
@@ -73,13 +75,13 @@ export default class IndentTune implements BlockTune {
         if (this.config.orientation === 'vertical')
             return [
                 {
-                    title: 'Indent',
+                    title: this.api.i18n.t('Indent'),
                     onActivate: (item, event) => this.indentBlock(),
                     icon: RIGHT_ARROW_ICON,
                     name: `${this.TuneNames.indent}-${this.block.id}`,
                 },
                 {
-                    title: 'Un indent',
+                    title: this.api.i18n.t('Un Indent'),
                     onActivate: (item, event) => this.unIndentBlock(),
                     icon: LEFT_ARROW_ICON,
                     name: `${this.TuneNames.unindent}-${this.block.id}`,
@@ -89,7 +91,7 @@ export default class IndentTune implements BlockTune {
         const html = /*html*/ `
 			<div class="${this.CSS.popoverItem} ${this.CSS.customPopoverItem}" data-item-name='indent'>
 				<button class="${this.CSS.popoverItemIcon}" data-unindent>${LEFT_ARROW_ICON}</button>
-				<div class="${this.CSS.popoverItemTitle}">Indent</div>
+				<div class="${this.CSS.popoverItemTitle}">${this.api.i18n.t('Indent')}</div>
 				<button class="${this.CSS.popoverItemIcon}" data-indent style="margin-left:10px;">${RIGHT_ARROW_ICON}</button>
 			</div>
 		`
