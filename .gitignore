@@ -3,4 +3,4 @@ local-testing.*
 node_modules/
 package-lock.json
 
-bundle.js.LICENSE.txt
+dist/bundle.js

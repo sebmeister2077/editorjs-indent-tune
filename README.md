@@ -41,18 +41,55 @@ const editor = new EditorJS({
 Optionally, you can connect this Tune only for specified blocks:
 
 ```js
-import EditorJS from '@editorjs/editorjs'
-import IndentTune from 'editorjs-block-indent-blocktune'
-
-/**
- * Editor.js configuration
- */
 const editor = new EditorJS({
     tools: {
         indentTune: IndentTune,
         paragraph: {
             // apply only for the 'paragraph' tool
             tunes: ['indentTune'],
+        },
+    },
+})
+```
+
+You can disable this tune for a specific block by not adding it in the tunes array
+
+```js
+const editor = new EditorJS({
+    tools: {
+        someOtherTool: {
+            //...
+            tunes: [
+                /* all other tunes except those you dont want*/
+            ],
+        },
+    },
+})
+```
+
+Complete example:
+
+```js
+import IndentTune, { type IndentTuneConfig } from 'editorjs-block-indent-blocktune'
+
+const editor = new EditorJS({
+    tools: {
+
+        someOtherTool: {
+            //...
+        },
+        indentTune: {
+            class: IndentTune,
+            config: {
+                customBlockIndentLimits: {
+                    someOtherTool: { max: 5 },
+                },
+                maxIndent: 10,
+                indentSize: 30,
+                multiblock: true,
+                tuneName: 'indentTune',
+                // If you use typescript
+            } as Partial<IndentTuneConfig>,
         },
     },
 })
