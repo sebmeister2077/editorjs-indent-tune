@@ -1,10 +1,15 @@
 import { type BlockTune } from '@editorjs/editorjs';
 import { type BlockToolConstructorOptions, type TunesMenuConfig } from '@editorjs/editorjs/types/tools/index.js';
 export type IndentTuneConfig = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
-    tuneName: string | null;
-    multiblock: boolean;
     orientation: 'horizontal' | 'vertical';
-};
+    customBlockIndentLimits: Record<string, Partial<Record<'min' | 'max', number>>>;
+} & ({
+    tuneName: string;
+    multiblock: true;
+} | {
+    tuneName: null;
+    multiblock: false;
+});
 export type IndentData = {
     indentLevel: number;
 };
@@ -21,6 +26,7 @@ export default class IndentTune implements BlockTune {
     save(): IndentData;
     private get CSS();
     private get TuneNames();
+    private get customInterval();
     private indentBlock;
     private unIndentBlock;
     private getTuneButton;
