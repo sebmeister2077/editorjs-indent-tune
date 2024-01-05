@@ -2,3 +2,4 @@ local-testing.*
 
 node_modules/
 package-lock.json
+dist/dev-build.js

@@ -32,13 +32,13 @@ export default class IndentTune implements BlockTune {
     }
 
     private api: API
-    private block: BlockAPI
+    private block: BlockAPI | undefined
     private config: IndentTuneConfigOptions
     public data: IndentData
     private wrapper: HTMLElement | null = null
     constructor({ api, data, config, block }: BlockToolConstructorOptions<IndentData, IndentTuneConfigOptions>) {
         this.api = api
-        this.block = block!
+        this.block = block
 
         const defaultConfig: IndentTuneConfigOptions = {
             indentSize: 24,
@@ -55,7 +55,7 @@ export default class IndentTune implements BlockTune {
             ...(config ?? {}),
         }
 
-        const defaultIndentLevel = this.config.customBlockIndentLimits[this.block.name]?.min ?? this.config.minIndent
+        const defaultIndentLevel = this.config.customBlockIndentLimits[this.block?.name ?? '']?.min ?? this.config.minIndent
         this.data = {
             //@ts-ignore
             indentLevel: defaultIndentLevel,
@@ -84,13 +84,13 @@ export default class IndentTune implements BlockTune {
                     title: this.api.i18n.t('Indent'),
                     onActivate: (item, event) => this.indentBlock(),
                     icon: RIGHT_ARROW_ICON,
-                    name: `${this.TuneNames.indent}-${this.block.id}`,
+                    name: `${this.TuneNames.indent}-${this.block?.id}`,
                 },
                 {
                     title: this.api.i18n.t('Un Indent'),
                     onActivate: (item, event) => this.unIndentBlock(),
                     icon: LEFT_ARROW_ICON,
-                    name: `${this.TuneNames.unindent}-${this.block.id}`,
+                    name: `${this.TuneNames.unindent}-${this.block?.id}`,
                 },
             ]
 
@@ -135,7 +135,7 @@ export default class IndentTune implements BlockTune {
                 if (!this.config.multiblock || blocks.length < 2) {
                     if (isIndent) this.indentBlock()
                     else this.unIndentBlock()
-                    this.block.dispatchChange()
+                    this.block?.dispatchChange()
                     return
                 }
 
@@ -191,7 +191,7 @@ export default class IndentTune implements BlockTune {
     }
 
     private get customInterval() {
-        return this.config.customBlockIndentLimits[this.block.name] ?? {}
+        return this.config.customBlockIndentLimits[this.block?.name ?? ''] ?? {}
     }
 
     private get maxIndent() {
@@ -226,7 +226,7 @@ export default class IndentTune implements BlockTune {
 
     private getTuneButton(indentType: 'indent' | 'unindent') {
         return this.config.orientation === 'vertical'
-            ? this.getTuneByName(`${this.TuneNames[indentType]}[data-item-name=${this.block.id}]`)
+            ? this.getTuneByName(`${this.TuneNames[indentType]}[data-item-name=${this.block?.id}]`)
             : document.querySelector(`.${this.CSS.popoverItemIcon}[data-${indentType}]`)
     }
 
