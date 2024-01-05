@@ -1,39 +1,26 @@
+const path = require('path')
+
 module.exports = {
-    entry: './src/index.js',
-    mode: 'production',
-    target: ['web', 'es5'],
+    mode: 'development', // Change to 'production' for production build
+    entry: './src/index.ts', // Entry file for your TypeScript code
+    output: {
+        filename: 'bundle.js', // Output bundle file name
+        path: path.resolve(__dirname, 'dist'), // Output directory path
+    },
+    resolve: {
+        extensions: ['.ts', '.tsx', '.js'], // File extensions to resolve
+    },
     module: {
         rules: [
             {
-                test: /\.js$/,
+                test: /\.tsx?$/,
+                use: 'ts-loader', // Use ts-loader for TypeScript files
                 exclude: /node_modules/,
-                use: [
-                    {
-                        loader: 'babel-loader',
-                        options: {
-                            presets: ['@babel/preset-env'],
-                        },
-                    },
-                ],
             },
             {
                 test: /\.css$/,
                 use: ['style-loader', 'css-loader'],
             },
-            {
-                test: /\.(svg)$/,
-                use: [
-                    {
-                        loader: 'raw-loader',
-                    },
-                ],
-            },
         ],
-    },
-    output: {
-        path: __dirname + '/dist',
-        publicPath: '/',
-        filename: 'bundle.js',
-        libraryTarget: 'umd',
     },
 }

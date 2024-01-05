@@ -1,8 +1,8 @@
-import { LEFT_ARROW_ICON, RIGHT_ARROW_ICON } from './icons.js'
 import { type BlockTune, type API, type BlockAPI } from '@editorjs/editorjs'
-import { type TunesMenuConfig } from '@editorjs/editorjs/types/tools/index.js'
+import { BlockToolConstructorOptions, type TunesMenuConfig } from '@editorjs/editorjs/types/tools/index.js'
 import './index.css'
-
+import { LEFT_ARROW_ICON, RIGHT_ARROW_ICON } from './icons'
+import { IndentData, IndentTuneConfig } from './types'
 const WRAPPER_NAME = 'data-block-indent-wrapper'
 
 export default class IndentTune implements BlockTune {
@@ -12,18 +12,26 @@ export default class IndentTune implements BlockTune {
 
     private api: API
     private block: BlockAPI
-    private config: Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
-        tuneName: string | null
-        multiblock: boolean
-        orientation: 'horizontal' | 'vertical'
-    }
-    public data: { indentLevel: number }
-    private wrapper: HTMLElement
-    constructor({ api, data, config, block }) {
+    private config: IndentTuneConfig
+    public data: IndentData
+    private wrapper: HTMLElement | null = null
+    constructor({ api, data, config, block }: BlockToolConstructorOptions<IndentData, IndentTuneConfig>) {
         this.api = api
-        this.block = block
-        this.config = { indentSize: 24, maxIndent: 8, multiblock: false, tuneName: null, orientation: 'horizontal', ...(config ?? {}) }
-        this.data = { indentLevel: 0, ...(data ?? {}) }
+        this.block = block!
+        this.config = {
+            indentSize: 24,
+            maxIndent: 8,
+            minIndent: 0,
+            multiblock: false,
+            tuneName: null,
+            orientation: 'horizontal',
+            ...(config ?? {}),
+        }
+        this.data = {
+            //@ts-ignore
+            indentLevel: 0,
+            ...(data ?? {}),
+        }
 
         if (this.config.multiblock && !this.config.tuneName)
             console.error("IndentTune config 'tuneName' was not provided, this is required for multiblock option to work.")
