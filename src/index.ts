@@ -9,6 +9,11 @@ export type IndentTuneConfig = Partial<IndentTuneConfigOptions>
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
     orientation: 'horizontal' | 'vertical'
     customBlockIndentLimits: Record<string, Partial<Record<'min' | 'max', number>>>
+    /**
+     * Custom keyboard indent handler.
+     * Return 'indent' or 'unindent' if you want to change the current indentation
+     */
+    handleShortcut?: ((e: KeyboardEvent) => 'indent' | 'unindent' | undefined | void) | undefined
 } & (
         | {
               tuneName: string
@@ -43,6 +48,7 @@ export default class IndentTune implements BlockTune {
             tuneName: null,
             orientation: 'horizontal',
             customBlockIndentLimits: {},
+            handleShortcut: undefined,
         }
         this.config = {
             ...defaultConfig,
@@ -113,13 +119,16 @@ export default class IndentTune implements BlockTune {
         this.wrapper.addEventListener(
             'keydown',
             (e) => {
-                if (e.key !== 'Tab') return
+                if (!this.config.handleShortcut && e.key !== 'Tab') return
+                const handled = this.config.handleShortcut?.(e)
+                if (!handled) return
+
                 e.stopPropagation()
                 e.preventDefault()
 
                 //this might be still open
                 this.api.inlineToolbar.close()
-                const isIndent = !e.shiftKey
+                const isIndent = handled ? handled === 'indent' : !e.shiftKey
                 const blocks = this.getGlobalSelectedBlocks()
 
                 if (!this.config.multiblock || blocks.length < 2) {

@@ -1,8 +1,14 @@
 import { type BlockTune } from '@editorjs/editorjs';
 import { type BlockToolConstructorOptions, type TunesMenuConfig } from '@editorjs/editorjs/types/tools/index.js';
-export type IndentTuneConfig = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
+export type IndentTuneConfig = Partial<IndentTuneConfigOptions>;
+export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
     orientation: 'horizontal' | 'vertical';
     customBlockIndentLimits: Record<string, Partial<Record<'min' | 'max', number>>>;
+    /**
+     * Custom keyboard indent handler.
+     * Return 'indent' or 'unindent' if you want to change the current indentation
+     */
+    handleShortcut?: ((e: KeyboardEvent) => 'indent' | 'unindent' | undefined | void) | undefined;
 } & ({
     tuneName: string;
     multiblock: true;
@@ -20,7 +26,7 @@ export default class IndentTune implements BlockTune {
     private config;
     data: IndentData;
     private wrapper;
-    constructor({ api, data, config, block }: BlockToolConstructorOptions<IndentData, IndentTuneConfig>);
+    constructor({ api, data, config, block }: BlockToolConstructorOptions<IndentData, IndentTuneConfigOptions>);
     render(): HTMLElement | TunesMenuConfig;
     wrap(pluginsContent: HTMLElement): HTMLElement;
     save(): IndentData;
