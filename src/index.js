@@ -11,7 +11,7 @@ export default class IndentTune {
         this.config = { indentSize: 24, maxIndent: 8, multiblock: false, tuneName: null, orientation: 'horizontal', ...(config ?? {}) }
         this.data = { indentLevel: 0, ...(data ?? {}) }
 
-        if (multiblock && !tuneName)
+        if (this.config.multiblock && !this.config.tuneName)
             console.error("IndentTune config 'tuneName' was not provided, this is required for multiblock option to work.")
     }
 
