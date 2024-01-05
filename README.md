@@ -16,7 +16,7 @@ npm i editorjs-indent-tune
 
 ```js
 import EditorJS from '@editorjs/editorjs'
-import IndentTune from 'editorjs-block-indent-blocktune'
+import IndentTune from 'editorjs-indent-tune'
 
 /**
  * Editor.js configuration
@@ -70,7 +70,7 @@ const editor = new EditorJS({
 Complete example:
 
 ```js
-import IndentTune, { type IndentTuneConfig } from 'editorjs-block-indent-blocktune'
+import IndentTune, { type IndentTuneConfig } from 'editorjs-indent-tune'
 
 const editor = new EditorJS({
     tools: {
