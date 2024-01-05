@@ -1,18 +1,26 @@
-# Block indentation tune tool for Editor.js
+# EditorJS Indent Tune
 
-You can add indentation to any block.
+Indent feature for [Editor.js](https://editorjs.io).
 
-![readme](./assets/example1.gif)
+![](./assets/example1.gif)
 
-## How to use
+## Instalation
 
-1. Install
+### Install via NPM
 
 ```shell
 npm i editorjs-indent-tune
 ```
 
-2. Connect tool
+### Load from CDN
+
+Require this script on a page with Editor.js.
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/sebmeister2077/editorjs-block-indent-blocktune/dist/bundle.js"><script>
+```
+
+## Usage
 
 ```js
 import EditorJS from '@editorjs/editorjs'
@@ -75,14 +83,14 @@ import IndentTune, { type IndentTuneConfig } from 'editorjs-indent-tune'
 const editor = new EditorJS({
     tools: {
 
-        someOtherTool: {
+        someOtherBlock: {
             //...
         },
         indentTune: {
             class: IndentTune,
             config: {
                 customBlockIndentLimits: {
-                    someOtherTool: { max: 5 },
+                    someOtherBlock: { max: 5 },
                 },
                 maxIndent: 10,
                 indentSize: 30,
