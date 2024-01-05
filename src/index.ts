@@ -1,10 +1,17 @@
 import { type BlockTune, type API, type BlockAPI } from '@editorjs/editorjs'
-import { BlockToolConstructorOptions, type TunesMenuConfig } from '@editorjs/editorjs/types/tools/index.js'
-import './index.css'
+import { type BlockToolConstructorOptions, type TunesMenuConfig } from '@editorjs/editorjs/types/tools/index.js'
+// import './index.css'
 import { LEFT_ARROW_ICON, RIGHT_ARROW_ICON } from './icons'
-import { IndentData, IndentTuneConfig } from './types'
 const WRAPPER_NAME = 'data-block-indent-wrapper'
 
+require('./index.css').toString()
+export type IndentTuneConfig = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
+    tuneName: string | null
+    multiblock: boolean
+    orientation: 'horizontal' | 'vertical'
+}
+
+export type IndentData = { indentLevel: number }
 export default class IndentTune implements BlockTune {
     static get isTune() {
         return true

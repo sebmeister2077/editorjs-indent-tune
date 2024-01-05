@@ -5,10 +5,13 @@ module.exports = {
     entry: './src/index.ts', // Entry file for your TypeScript code
     output: {
         filename: 'bundle.js', // Output bundle file name
-        path: path.resolve(__dirname, 'dist'), // Output directory path
+        path: path.join(__dirname, '/dist'),
+        library: 'IndentPlugin',
+        libraryTarget: 'umd',
+        libraryExport: 'default',
     },
     resolve: {
-        extensions: ['.ts', '.tsx', '.js'], // File extensions to resolve
+        extensions: ['.ts', '.tsx', '.js', '.css'], // File extensions to resolve
     },
     module: {
         rules: [

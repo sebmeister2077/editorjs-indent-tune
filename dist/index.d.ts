@@ -1,7 +1,13 @@
 import { type BlockTune } from '@editorjs/editorjs';
-import { BlockToolConstructorOptions, type TunesMenuConfig } from '@editorjs/editorjs/types/tools/index.js';
-import './index.css';
-import { IndentData, IndentTuneConfig } from './types';
+import { type BlockToolConstructorOptions, type TunesMenuConfig } from '@editorjs/editorjs/types/tools/index.js';
+export type IndentTuneConfig = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
+    tuneName: string | null;
+    multiblock: boolean;
+    orientation: 'horizontal' | 'vertical';
+};
+export type IndentData = {
+    indentLevel: number;
+};
 export default class IndentTune implements BlockTune {
     static get isTune(): boolean;
     private api;
