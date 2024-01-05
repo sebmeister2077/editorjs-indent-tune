@@ -8,7 +8,7 @@ export default class IndentTune {
     constructor({ api, data, config, block }) {
         this.api = api
         this.block = block
-        this.config = { indentSize: 24, maxIndent: 8, multiblock: false, tuneName: null, ...(config ?? {}) }
+        this.config = { indentSize: 24, maxIndent: 8, multiblock: false, tuneName: null, orientation: 'horizontal', ...(config ?? {}) }
         this.data = { indentLevel: 0, ...(data ?? {}) }
 
         if (multiblock && !tuneName)
@@ -26,14 +26,27 @@ export default class IndentTune {
     render() {
         //Disable items after they are rendered synchronously
         setTimeout(() => {
-            if (this.data.indentLevel == this.config.maxIndent)
-                this.getTuneByName(`${this.TuneNames.indent}-${this.block.id}`)?.classList.add(this.CSS.disabledItem)
-            if (this.data.indentLevel == 0)
-                this.getTuneByName(`${this.TuneNames.unindent}-${this.block.id}`)?.classList.add(this.CSS.disabledItem)
+            if (this.data.indentLevel == this.config.maxIndent) this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
+            if (this.data.indentLevel == 0) this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
         }, 0)
 
+        if (this.config.orientation === 'horizontal')
+            return [
+                {
+                    title: 'Indent',
+                    onActivate: (item, event) => this.indentBlock(),
+                    icon: RIGHT_ARROW_ICON,
+                    name: `${this.TuneNames.indent}-${this.block.id}`,
+                },
+                {
+                    title: 'Un indent',
+                    onActivate: (item, event) => this.unIndentBlock(),
+                    icon: LEFT_ARROW_ICON,
+                    name: `${this.TuneNames.unindent}-${this.block.id}`,
+                },
+            ]
         const html = /*html*/ `
-			<div class="${this.CSS.popoverItem}" data-item-name='indent'>
+			<div class="${this.CSS.popoverItem} ${this.CSS.customPopoverItem}" data-item-name='indent'>
 				<button class="${this.CSS.popoverItemIcon}" data-unindent>${LEFT_ARROW_ICON}</button>
 				<div class="${this.CSS.popoverItemTitle}">Indent</div>
 				<button class="${this.CSS.popoverItemIcon}" data-indent style="margin-left:10px;">${RIGHT_ARROW_ICON}</button>
@@ -46,20 +59,6 @@ export default class IndentTune {
         item.querySelector('[data-unindent]')?.addEventListener('click', () => this.unIndentBlock())
 
         return item
-        return [
-            {
-                title: 'Indent',
-                onActivate: (item, event) => this.indentBlock(),
-                icon: RIGHT_ARROW_ICON,
-                name: `${this.TuneNames.indent}-${this.block.id}`,
-            },
-            {
-                title: 'Un indent',
-                onActivate: (item, event) => this.unIndentBlock(),
-                icon: LEFT_ARROW_ICON,
-                name: `${this.TuneNames.unindent}-${this.block.id}`,
-            },
-        ]
     }
 
     /**
@@ -69,6 +68,7 @@ export default class IndentTune {
     wrap(pluginsContent) {
         this.wrapper = document.createElement('div')
         this.wrapper.appendChild(pluginsContent)
+        this.wrapper.setAttribute(WRAPPER_NAME, '')
         this.wrapper.style.paddingLeft = `${this.data.indentLevel * this.config.indentSize}px`
 
         this.wrapper.addEventListener(
@@ -84,6 +84,7 @@ export default class IndentTune {
                 if (!this.config.multiblock || blocks.length < 2) {
                     if (isIndent) this.indentBlock()
                     else this.unIndentBlock()
+                    b.dispatchChange()
                     return
                 }
 
@@ -102,7 +103,7 @@ export default class IndentTune {
                     //apply visual feedback manually, since we can't make the tune update on other blocks
                     const blockWrapper = this.getWrapperBlockById(b.id)
                     if (blockWrapper instanceof HTMLElement) {
-                        this.applyStylesToWrapper(blockWrapper, savedData.tunes.indentTune.indentLevel)
+                        this.applyStylesToWrapper(blockWrapper, tune.indentLevel)
                     }
                 })
             },
@@ -114,7 +115,8 @@ export default class IndentTune {
 
     get CSS() {
         return {
-            popoverItem: 'ce-popover-item ce-popover-item-custom',
+            cusotmPopoverItem: ' ce-popover-item-custom',
+            popoverItem: 'ce-popover-item',
             popoverItemIcon: 'ce-popover-item__icon',
             popoverItemTitle: 'ce-popover-item__title',
             disabledItem: 'ce-popover-item--disabled',
@@ -135,9 +137,8 @@ export default class IndentTune {
         this.applyStylesToWrapper(this.wrapper)
 
         //disable tune
-        this.getTuneByName(`${this.TuneNames.unindent}-${this.block.id}`)?.classList.remove(this.CSS.disabledItem)
-        if (this.data.indentLevel == this.config.maxIndent)
-            this.getTuneByName(`${this.TuneNames.indent}-${this.block.id}`)?.classList.add(this.CSS.disabledItem)
+        this.getTuneButton('unindent')?.classList.remove(this.CSS.disabledItem)
+        if (this.data.indentLevel == this.config.maxIndent) this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
     }
 
     unIndentBlock() {
@@ -147,11 +148,15 @@ export default class IndentTune {
         this.applyStylesToWrapper(this.wrapper)
 
         // disable tune
-        this.getTuneByName(`${this.TuneNames.indent}-${this.block.id}`)?.classList.remove(this.CSS.disabledItem)
-        if (this.data.indentLevel == 0)
-            this.getTuneByName(`${this.TuneNames.unindent}-${this.block.id}`)?.classList.add(this.CSS.disabledItem)
+        this.getTuneButton('indent')?.classList.remove(this.CSS.disabledItem)
+        if (this.data.indentLevel == 0) this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
     }
 
+    getTuneButton(indentType) {
+        return this.config.orientation === 'vertical'
+            ? this.getTuneByName(`${this.TuneNames[indentType]}[data-item-name=${this.block.id}]`)
+            : document.querySelector(`.${this.CSS.popoverItemIcon}[data-${indentType}]`)
+    }
     /**
      * @param {string} name
      * @returns {HTMLElement}
