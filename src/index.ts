@@ -119,9 +119,10 @@ export default class IndentTune implements BlockTune {
         this.wrapper.addEventListener(
             'keydown',
             (e) => {
-                if (!this.config.handleShortcut && e.key !== 'Tab') return
+                const omitDefaultBehaviour = Boolean(this.config.handleShortcut)
+                if (!omitDefaultBehaviour && e.key !== 'Tab') return
                 const handled = this.config.handleShortcut?.(e)
-                if (!handled) return
+                if (handled && omitDefaultBehaviour) return
 
                 e.stopPropagation()
                 e.preventDefault()
