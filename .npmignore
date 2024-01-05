@@ -2,4 +2,4 @@ assets/
 src/
 webpack.config.js
 
-dist/dev-build.js
+dev-build.js
