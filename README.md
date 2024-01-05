@@ -2,6 +2,8 @@
 
 You can add indentation to any block.
 
+![readme](./assets/example1.gif)
+
 ## How to use
 
 1. Install
@@ -40,23 +42,23 @@ Optionally, you can connect this Tune only for specified blocks:
 
 ```js
 import EditorJS from '@editorjs/editorjs'
-import TextVariantTune from '@editorjs/text-variant-tune'
+import IndentTune from 'editorjs-block-indent-blocktune'
 
 /**
  * Editor.js configuration
  */
 const editor = new EditorJS({
     tools: {
-        textVariant: TextVariantTune,
+        indentTune: IndentTune,
         paragraph: {
             // apply only for the 'paragraph' tool
-            tunes: ['textVariant'],
+            tunes: ['indentTune'],
         },
     },
 })
 ```
 
-## Config Params
+## Config Params (optional)
 
 | Field                   | Type                                                      | Description                                                   | Default      |
 | ----------------------- | --------------------------------------------------------- | ------------------------------------------------------------- | ------------ |
