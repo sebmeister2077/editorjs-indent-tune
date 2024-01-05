@@ -115,6 +115,8 @@ export default class IndentTune implements BlockTune {
                 e.stopPropagation()
                 e.preventDefault()
 
+                //this might be still open
+                this.api.inlineToolbar.close()
                 const isIndent = !e.shiftKey
                 const blocks = this.getGlobalSelectedBlocks()
 
