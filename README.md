@@ -9,7 +9,7 @@ You can add indentation to any block.
 1. Install
 
 ```shell
-npm i editorjs-block-indent-blocktune
+npm i editorjs-indent-tune
 ```
 
 2. Connect tool
