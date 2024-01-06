@@ -24,6 +24,11 @@ jobs:
                   npx webpack
                   npm run build
 
+            - name: Set up Git Author
+              run: |
+                  git config --global user.email "${{ github.event.head_commit.author.email }}"
+                  git config --global user.name "${{ github.event.head_commit.author.name }}"
+
             - name: Update bundle.js
               run: |
                   git add ./dist/
