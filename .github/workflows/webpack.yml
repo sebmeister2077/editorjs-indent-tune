@@ -1,4 +1,4 @@
-name: Publish to NPM with Webpack
+name: Build bundle
 
 on:
     push:
@@ -17,7 +17,6 @@ jobs:
               uses: actions/setup-node@v1
               with:
                   node-version: 18
-                  registry-url: https://registry.npmjs.org/
 
             - name: Install & Build
               run: |
@@ -25,10 +24,16 @@ jobs:
                   npx webpack
                   npm run build
 
-            - name: Log in to npm
-              run: npm login --registry=https://registry.npmjs.org/ --scope=editorjs-indent-tune --always-auth=false
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+            - name: Update bundle.js
+              run: |
+                  git add ./dist/.
+                  git commit -m "Create bundle" --no-verify
+              # Don't trigger workflow
+
+            # - name: Log in to npm
+            #   run: npm login --registry=https://registry.npmjs.org/ --scope=editorjs-indent-tune --always-auth=false
+            #   env:
+            #       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
             # - name: Publish to NPM
             #   run: npm publish --tag beta
