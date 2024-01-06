@@ -1,4 +1,4 @@
-name: NodeJS with Webpack
+name: Publish to NPM with Webpack
 
 on:
     push:
@@ -27,4 +27,6 @@ jobs:
                   npm install
                   npx webpack
                   npm run build
+                  ls
+                  cd ./dist
                   ls
