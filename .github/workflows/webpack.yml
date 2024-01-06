@@ -18,8 +18,13 @@ jobs:
               with:
                   node-version: 18.x
 
-            - name: Build
+            - name: Install & Build
               run: |
                   npm install
                   npx webpack
                   npm run build
+
+            - name: Publish to NPM
+              run: npm publish --access=public --tag beta
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
