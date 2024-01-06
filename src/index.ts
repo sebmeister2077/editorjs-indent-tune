@@ -97,7 +97,7 @@ export default class IndentTune implements BlockTune {
         const html = /*html*/ `
 			<div class="${this.CSS.popoverItem} ${this.CSS.customPopoverItem}" data-item-name='indent'>
 				<button class="${this.CSS.popoverItemIcon}" data-unindent>${LEFT_ARROW_ICON}</button>
-				<div class="${this.CSS.popoverItemTitle}">${this.api.i18n.t('Indent')}</div>
+				<div class="${this.CSS.popoverItemTitle}">${this.api.sanitizer.clean(this.api.i18n.t('Indent'), {})}</div>
 				<button class="${this.CSS.popoverItemIcon}" data-indent style="margin-left:10px;">${RIGHT_ARROW_ICON}</button>
 			</div>
 		`
