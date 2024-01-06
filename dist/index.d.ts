@@ -35,6 +35,7 @@ export default class IndentTune implements BlockTune {
     private get customInterval();
     private get maxIndent();
     private get minIndent();
+    private onKeyDown;
     private indentBlock;
     private unIndentBlock;
     private getTuneButton;

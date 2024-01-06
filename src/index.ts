@@ -116,55 +116,7 @@ export default class IndentTune implements BlockTune {
         this.wrapper.setAttribute(WRAPPER_NAME, '')
         this.wrapper.style.paddingLeft = `${this.data.indentLevel * this.config.indentSize}px`
 
-        this.wrapper.addEventListener(
-            'keydown',
-            (e) => {
-                const omitDefaultBehaviour = Boolean(this.config.handleShortcut)
-                if (!omitDefaultBehaviour && e.key !== 'Tab') return
-                const handled = this.config.handleShortcut?.(e)
-                if (handled && omitDefaultBehaviour) return
-
-                e.stopPropagation()
-                e.preventDefault()
-
-                //this might be still open
-                this.api.inlineToolbar.close()
-                const isIndent = handled ? handled === 'indent' : !e.shiftKey
-                const blocks = this.getGlobalSelectedBlocks()
-
-                if (!this.config.multiblock || blocks.length < 2) {
-                    if (isIndent) this.indentBlock()
-                    else this.unIndentBlock()
-                    this.block?.dispatchChange()
-                    return
-                }
-
-                if (!Boolean(this.config.tuneName)) {
-                    console.error(`'tuneName' is empty.`)
-                    return
-                }
-
-                blocks.forEach(async (b) => {
-                    //get block indent level
-                    const savedData = await b.save()
-                    if (!savedData) return
-
-                    //this somehow SAVES fine
-                    const tune = (savedData as any).tunes?.[this.config.tuneName!]
-                    console.assert(Boolean(tune), `'tuneName' is invalid, no tune was found for block ${b.name}`)
-                    if (isIndent) tune.indentLevel = Math.min(this.config.maxIndent, (tune.indentLevel ?? 0) + 1)
-                    else tune.indentLevel = Math.max(0, (tune.indentLevel ?? 0) - 1)
-                    b.dispatchChange()
-
-                    //apply visual feedback manually, since we can't make the tune update on other blocks
-                    const blockWrapper = this.getWrapperBlockById(b.id)
-                    if (blockWrapper instanceof HTMLElement) {
-                        this.applyStylesToWrapper(blockWrapper, tune.indentLevel)
-                    }
-                })
-            },
-            { capture: true },
-        )
+        this.wrapper.addEventListener('keydown', (...args) => this.onKeyDown.apply(this, args), { capture: true })
 
         return this.wrapper
     }
@@ -200,6 +152,52 @@ export default class IndentTune implements BlockTune {
 
     private get minIndent() {
         return this.customInterval.min ?? this.config.minIndent
+    }
+
+    private onKeyDown(e: KeyboardEvent) {
+        const omitDefaultBehaviour = Boolean(this.config.handleShortcut)
+        if (!omitDefaultBehaviour && e.key !== 'Tab') return
+        const handled = this.config.handleShortcut?.(e)
+        if (handled && omitDefaultBehaviour) return
+
+        e.stopPropagation()
+        e.preventDefault()
+
+        //this might be still open
+        this.api.inlineToolbar.close()
+        const isIndent = handled ? handled === 'indent' : !e.shiftKey
+        const blocks = this.getGlobalSelectedBlocks()
+
+        if (!this.config.multiblock || blocks.length < 2) {
+            if (isIndent) this.indentBlock()
+            else this.unIndentBlock()
+            this.block?.dispatchChange()
+            return
+        }
+
+        if (!Boolean(this.config.tuneName)) {
+            console.error(`'tuneName' is empty.`)
+            return
+        }
+
+        blocks.forEach(async (b) => {
+            //get block indent level
+            const savedData = await b.save()
+            if (!savedData) return
+
+            //this somehow SAVES fine
+            const tune = (savedData as any).tunes?.[this.config.tuneName!]
+            console.assert(Boolean(tune), `'tuneName' is invalid, no tune was found for block ${b.name}`)
+            if (isIndent) tune.indentLevel = Math.min(this.config.maxIndent, (tune.indentLevel ?? 0) + 1)
+            else tune.indentLevel = Math.max(0, (tune.indentLevel ?? 0) - 1)
+            b.dispatchChange()
+
+            //apply visual feedback manually, since we can't make the tune update on other blocks
+            const blockWrapper = this.getWrapperBlockById(b.id)
+            if (blockWrapper instanceof HTMLElement) {
+                this.applyStylesToWrapper(blockWrapper, tune.indentLevel)
+            }
+        })
     }
 
     private indentBlock() {
