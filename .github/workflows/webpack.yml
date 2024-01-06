@@ -2,9 +2,9 @@ name: Build bundle
 
 on:
     push:
-        branches: ['dev']
+        branches: ['main']
     pull_request:
-        branches: ['dev']
+        branches: ['main']
 permissions:
     contents: write
 
