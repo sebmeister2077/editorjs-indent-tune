@@ -185,9 +185,17 @@ export default class IndentTune implements BlockTune {
             const savedData = await b.save()
             if (!savedData) return
 
+            if (!('tunes' in savedData) || typeof savedData.tunes !== 'object' || !savedData.tunes) {
+                console.error('Multiblock indenting is not supported for this editor version. ')
+                return
+            }
+
             //this somehow SAVES fine
-            const tune = (savedData as any).tunes?.[this.config.tuneName!]
-            console.assert(Boolean(tune), `'tuneName' is invalid, no tune was found for block ${b.name}`)
+            const tune = (savedData.tunes as Record<string, IndentData>)[this.config.tuneName ?? ''] as IndentData | undefined
+            if (!tune) {
+                console.error(`'tuneName' is invalid, no tune was found for block ${b.name}`)
+                return
+            }
             if (isIndent) tune.indentLevel = Math.min(this.config.maxIndent, (tune.indentLevel ?? 0) + 1)
             else tune.indentLevel = Math.max(0, (tune.indentLevel ?? 0) - 1)
             b.dispatchChange()
