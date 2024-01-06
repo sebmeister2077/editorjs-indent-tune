@@ -26,7 +26,7 @@ jobs:
 
             - name: Update bundle.js
               run: |
-                  git add ./dist/.
+                  git add ./dist/
                   git commit -m "Create bundle" --no-verify
               # Don't trigger workflow
 
