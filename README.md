@@ -112,6 +112,6 @@ const editor = new EditorJS({
 | minIndent               | `number`                                                             | The lower indent limit of any block                                                  | `0`          |
 | orientation             | `'horizontal' \| 'vertical'`                                         | The UI design for how you want the toolbox to be displayed                           | `horizontal` |
 | customBlockIndentLimits | `Record<string, Partial<Record<'min' \| 'max', number>>>`            | A set of overrides of the indent limit for each type of block                        | `{}`         |
-| multiblock              | `boolean`                                                            | If you can indent multiple blocks at a time                                          | `false`      |
+| multiblock              | `boolean`                                                            | Marks if you can indent multiple blocks at a time                                    | `false`      |
 | tuneName                | `string \| null`                                                     | This is required for multiblock to work                                              | `null`       |
 | handleShortcut          | `((e:KeyboardEvent) => 'unindent' \| 'indent' \| void) \| undefined` | Custom shortcut function that allows overriding the default indenting using keyboard | `undefined`  |
