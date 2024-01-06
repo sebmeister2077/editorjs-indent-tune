@@ -35,7 +35,7 @@ jobs:
               run: |
                   git add ./dist/
                   git commit -m "Create bundle"
-                  git push
+                  git push origin/main --no-verify
               # Don't trigger workflow
 
             # - name: Log in to npm
