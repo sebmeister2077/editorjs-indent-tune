@@ -2,9 +2,9 @@ name: Build bundle
 
 on:
     push:
-        branches: ['main']
+        branches: ['dev']
     pull_request:
-        branches: ['main']
+        branches: ['dev']
 permissions:
     contents: write
 
@@ -33,8 +33,10 @@ jobs:
 
             - name: Update bundle.js
               run: |
-                  git commit -am "Create bundle"
-                  git push origin/main --no-verify
+                  git add ./dist/
+                  git commit -m "Create bundle"
+                  git push
+
               # Don't trigger workflow
 
             # - name: Log in to npm
