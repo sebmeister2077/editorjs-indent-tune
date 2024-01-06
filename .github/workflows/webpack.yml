@@ -33,7 +33,8 @@ jobs:
               run: |
                   git add ./dist/
                   git commit -m "Create bundle"
-                  git push origin -u main --no-verify
+                  git remote add origin https://github.com/sebmeister2077/editorjs-block-indent-blocktune.git
+                  git push origin main --no-verify
               # Don't trigger workflow
 
             # - name: Log in to npm
