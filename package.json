@@ -1,6 +1,6 @@
 {
     "name": "editorjs-indent-tune",
-    "version": "1.0.9",
+    "version": "1.0.10",
     "description": "Block tune for Editor.js ",
     "scripts": {
         "build": "webpack --mode production",
@@ -38,10 +38,10 @@
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/sebmeister2077/editorjs-block-indent-blocktune.git"
+        "url": "https://github.com/sebmeister2077/editorjs-indent-tune.git"
     },
     "bugs": {
-        "url": "https://github.com/sebmeister2077/editorjs-block-indent-blocktune/issues"
+        "url": "https://github.com/sebmeister2077/editorjs-indent-tune/issues"
     },
-    "homepage": "https://github.com/sebmeister2077/editorjs-block-indent-blocktune#readme"
+    "homepage": "https://github.com/sebmeister2077/editorjs-indent-tune#readme"
 }
