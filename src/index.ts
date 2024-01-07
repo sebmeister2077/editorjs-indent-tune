@@ -1,6 +1,6 @@
 import { type BlockTune, type API, type BlockAPI } from '@editorjs/editorjs'
 import { type BlockToolConstructorOptions, type TunesMenuConfig } from '@editorjs/editorjs/types/tools/index.js'
-import { LEFT_ARROW_ICON, RIGHT_ARROW_ICON } from './icons'
+import { IconChevronLeft, IconChevronRight } from '@codexteam/icons'
 const WRAPPER_NAME = 'data-block-indent-wrapper'
 
 require('./index.css').toString()
@@ -83,22 +83,22 @@ export default class IndentTune implements BlockTune {
                 {
                     title: this.api.i18n.t('Indent'),
                     onActivate: (item, event) => this.indentBlock(),
-                    icon: RIGHT_ARROW_ICON,
+                    icon: IconChevronRight,
                     name: `${this.TuneNames.indent}-${this.block?.id}`,
                 },
                 {
                     title: this.api.i18n.t('Un Indent'),
                     onActivate: (item, event) => this.unIndentBlock(),
-                    icon: LEFT_ARROW_ICON,
+                    icon: IconChevronLeft,
                     name: `${this.TuneNames.unindent}-${this.block?.id}`,
                 },
             ]
 
         const html = /*html*/ `
 			<div class="${this.CSS.popoverItem} ${this.CSS.customPopoverItem}" data-item-name='indent'>
-				<button class="${this.CSS.popoverItemIcon}" data-unindent>${LEFT_ARROW_ICON}</button>
+				<button class="${this.CSS.popoverItemIcon}" data-unindent>${IconChevronLeft}</button>
 				<div class="${this.CSS.popoverItemTitle}">${this.api.sanitizer.clean(this.api.i18n.t('Indent'), {})}</div>
-				<button class="${this.CSS.popoverItemIcon}" data-indent style="margin-left:10px;">${RIGHT_ARROW_ICON}</button>
+				<button class="${this.CSS.popoverItemIcon}" data-indent style="margin-left:10px;">${IconChevronRight}</button>
 			</div>
 		`
 
@@ -127,7 +127,7 @@ export default class IndentTune implements BlockTune {
 
     private get CSS() {
         return {
-            customPopoverItem: ' ce-popover-item-custom',
+            customPopoverItem: 'ce-popover-indent-item',
             popoverItem: 'ce-popover-item',
             popoverItemIcon: 'ce-popover-item__icon',
             popoverItemTitle: 'ce-popover-item__title',

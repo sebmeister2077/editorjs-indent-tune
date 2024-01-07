@@ -1,8 +1,12 @@
-.ce-popover-item-custom:hover {
+.ce-popover-indent-item {
+    cursor: default !important;
+}
+.ce-popover-indent-item:hover {
     background-color: transparent !important;
 }
 
-.ce-popover-item-custom .ce-popover-item__icon {
+.ce-popover-indent-item .ce-popover-item__icon {
+    cursor: pointer;
     will-change: background-color;
     transition: 0.3s background-color;
     padding-block: 0px;
@@ -11,19 +15,20 @@
     color: var(--color-text-primary, black);
 }
 
-.ce-popover-item-custom .ce-popover-item--disabled {
+.ce-popover-indent-item .ce-popover-item--disabled {
     color: var(--color-text-secondary, #707684);
+    cursor: default;
 }
 
-.ce-popover-item-custom .ce-popover-item__icon:focus {
+.ce-popover-indent-item .ce-popover-item__icon:focus {
     outline: none;
 }
 
-.ce-popover-item-custom:hover .ce-popover-item__icon {
+.ce-popover-indent-item:hover .ce-popover-item__icon {
     box-shadow: 0 0 0 1px var(--color-border-icon, rgba(201, 201, 204, 0.48)) !important;
     -webkit-box-shadow: 0 0 0 1px var(--color-border-icon, rgba(201, 201, 204, 0.48)) !important;
 }
 
-.ce-popover-item-custom .ce-popover-item__icon:hover {
+.ce-popover-indent-item .ce-popover-item__icon:hover {
     background-color: var(--color-background-item-hover, #eff2f5);
 }
