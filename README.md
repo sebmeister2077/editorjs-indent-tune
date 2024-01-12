@@ -17,7 +17,7 @@ npm i editorjs-indent-tune
 Require this script on a page with Editor.js.
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/sebmeister2077/editorjs-block-indent-blocktune/dist/bundle.js"><script>
+<script src="https://cdn.jsdelivr.net/gh/sebmeister2077/editorjs-indent-tune/dist/bundle.js"><script>
 ```
 
 ## Usage
