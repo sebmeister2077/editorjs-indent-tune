@@ -1,9 +1,9 @@
-import { type BlockTune, type API, type BlockAPI } from '@editorjs/editorjs'
+import EditorJS, { type BlockTune, type API, type BlockAPI } from '@editorjs/editorjs'
 import { type BlockToolConstructorOptions, type TunesMenuConfig } from '@editorjs/editorjs/types/tools/index.js'
 import { IconChevronLeft, IconChevronRight } from '@codexteam/icons'
-const WRAPPER_NAME = 'data-block-indent-wrapper'
+import './index.css'
 
-require('./index.css').toString()
+const WRAPPER_NAME = 'data-block-indent-wrapper'
 
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
@@ -16,13 +16,13 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
     handleShortcut?: ((e: KeyboardEvent) => 'indent' | 'unindent' | undefined | void) | undefined
 } & (
         | {
-              tuneName: string
-              multiblock: true
-          }
+            tuneName: string
+            multiblock: true
+        }
         | {
-              tuneName: null
-              multiblock: false
-          }
+            tuneName: null
+            multiblock: false
+        }
     )
 
 export type IndentData = { indentLevel: number }

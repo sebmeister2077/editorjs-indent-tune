@@ -97,7 +97,7 @@ const editor = new EditorJS({
                 multiblock: true,
                 tuneName: 'indentTune',
                 // If you use typescript
-            } as Partial<IndentTuneConfig>,
+            } as IndentTuneConfig,
         },
     },
 })
