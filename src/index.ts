@@ -7,13 +7,14 @@ const WRAPPER_NAME = 'data-block-indent-wrapper'
 
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
-    orientation: 'horizontal' | 'vertical'
-    customBlockIndentLimits: Record<string, Partial<Record<'min' | 'max', number>>>
+    orientation: 'horizontal' | 'vertical';
+    customBlockIndentLimits: Record<string, Partial<Record<'min' | 'max', number>>>;
     /**
      * Custom keyboard indent handler.
      * Return 'indent' or 'unindent' if you want to change the current indentation
      */
-    handleShortcut?: ((e: KeyboardEvent) => 'indent' | 'unindent' | undefined | void) | undefined
+    handleShortcut?: ((e: KeyboardEvent) => 'indent' | 'unindent' | undefined | void) | undefined;
+    direction: "ltr" | "rtl";
 } & (
         | {
             tuneName: string
@@ -49,6 +50,7 @@ export default class IndentTune implements BlockTune {
             orientation: 'horizontal',
             customBlockIndentLimits: {},
             handleShortcut: undefined,
+            direction: "ltr",
         }
         this.config = {
             ...defaultConfig,
@@ -74,8 +76,10 @@ export default class IndentTune implements BlockTune {
     public render(): HTMLElement | TunesMenuConfig {
         //Disable items after they are rendered synchronously
         setTimeout(() => {
-            if (this.data.indentLevel == this.maxIndent) this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
-            if (this.data.indentLevel == this.minIndent) this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
+            if (this.data.indentLevel == this.maxIndent)
+                this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
+            if (this.data.indentLevel == this.minIndent)
+                this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
         }, 0)
 
         if (this.config.orientation === 'vertical')
@@ -104,8 +108,8 @@ export default class IndentTune implements BlockTune {
 
         const item = new DOMParser().parseFromString(html, 'text/html').body.firstChild as HTMLElement
 
-        item.querySelector('[data-indent]')?.addEventListener('click', () => this.indentBlock())
-        item.querySelector('[data-unindent]')?.addEventListener('click', () => this.unIndentBlock())
+        item.querySelector('[data-indent]')?.addEventListener('click', () => this.isDirectionInverted ? this.unIndentBlock() : this.indentBlock())
+        item.querySelector('[data-unindent]')?.addEventListener('click', () => this.isDirectionInverted ? this.indentBlock() : this.unIndentBlock())
 
         return item
     }
@@ -114,7 +118,8 @@ export default class IndentTune implements BlockTune {
         this.wrapper = document.createElement('div')
         this.wrapper.appendChild(pluginsContent)
         this.wrapper.setAttribute(WRAPPER_NAME, '')
-        this.wrapper.style.paddingLeft = `${this.data.indentLevel * this.config.indentSize}px`
+
+        this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
 
         this.wrapper.addEventListener('keydown', (...args) => this.onKeyDown.apply(this, args), { capture: true })
 
@@ -152,6 +157,10 @@ export default class IndentTune implements BlockTune {
 
     private get minIndent() {
         return this.customInterval.min ?? this.config.minIndent
+    }
+
+    private get isDirectionInverted() {
+        return this.config.direction !== 'ltr'; // also ignore invalid directions
     }
 
     private onKeyDown(e: KeyboardEvent) {
@@ -216,7 +225,9 @@ export default class IndentTune implements BlockTune {
 
         //disable tune
         this.getTuneButton('unindent')?.classList.remove(this.CSS.disabledItem)
-        if (this.data.indentLevel === this.maxIndent) this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
+        if (this.data.indentLevel === this.maxIndent)
+            this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
+
     }
 
     private unIndentBlock() {
@@ -231,9 +242,13 @@ export default class IndentTune implements BlockTune {
     }
 
     private getTuneButton(indentType: 'indent' | 'unindent') {
+        let indentName = indentType;
+        if (this.isDirectionInverted)
+            indentName = indentType == 'indent' ? "unindent" : "indent";
+
         return this.config.orientation === 'vertical'
-            ? this.getTuneByName(`${this.TuneNames[indentType]}[data-item-name=${this.block?.id}]`)
-            : document.querySelector(`.${this.CSS.popoverItemIcon}[data-${indentType}]`)
+            ? this.getTuneByName(`${this.TuneNames[indentName]}[data-item-name=${this.block?.id}]`)
+            : document.querySelector(`.${this.CSS.popoverItemIcon}[data-${indentName}]`)
     }
 
     private getTuneByName(name: string) {
@@ -241,7 +256,14 @@ export default class IndentTune implements BlockTune {
     }
 
     private applyStylesToWrapper(wrapper: HTMLElement, indentLevel: number) {
-        wrapper.style.paddingLeft = `${indentLevel * this.config.indentSize}px`
+        const indentValuePixels = `${indentLevel * this.config.indentSize}px`
+        if (this.isDirectionInverted) {
+            wrapper.style.paddingLeft = '0px';
+            wrapper.style.paddingRight = indentValuePixels;
+        } else {
+            wrapper.style.paddingLeft = indentValuePixels;
+            wrapper.style.paddingRight = "0px";
+        }
     }
 
     private getGlobalSelectedBlocks() {

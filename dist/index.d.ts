@@ -10,6 +10,7 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
      * Return 'indent' or 'unindent' if you want to change the current indentation
      */
     handleShortcut?: ((e: KeyboardEvent) => 'indent' | 'unindent' | undefined | void) | undefined;
+    direction: "ltr" | "rtl";
 } & ({
     tuneName: string;
     multiblock: true;
@@ -36,6 +37,7 @@ export default class IndentTune implements BlockTune {
     private get customInterval();
     private get maxIndent();
     private get minIndent();
+    private get isDirectionInverted();
     private onKeyDown;
     private indentBlock;
     private unIndentBlock;
