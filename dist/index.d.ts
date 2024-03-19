@@ -39,6 +39,8 @@ export default class IndentTune implements BlockTune {
     private get minIndent();
     private get isDirectionInverted();
     private onKeyDown;
+    private handleIndentLeft;
+    private handleIndentRight;
     private indentBlock;
     private unIndentBlock;
     private getTuneButton;

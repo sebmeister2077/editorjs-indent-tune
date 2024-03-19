@@ -82,34 +82,36 @@ export default class IndentTune implements BlockTune {
                 this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
         }, 0)
 
+        const indentText = 'Indent'
+        const unIndentText = 'Un Indent'
         if (this.config.orientation === 'vertical')
             return [
                 {
-                    title: this.api.i18n.t('Indent'),
-                    onActivate: (item, event) => this.indentBlock(),
+                    title: this.api.i18n.t(this.isDirectionInverted ? unIndentText : indentText),
+                    onActivate: (item, event) => this.handleIndentRight(),
                     icon: IconChevronRight,
-                    name: `${this.TuneNames.indent}-${this.block?.id}`,
+                    name: `${this.TuneNames.indentRight}-${this.block?.id}`,
                 },
                 {
-                    title: this.api.i18n.t('Un Indent'),
-                    onActivate: (item, event) => this.unIndentBlock(),
+                    title: this.api.i18n.t(this.isDirectionInverted ? indentText : unIndentText),
+                    onActivate: (item, event) => this.handleIndentLeft(),
                     icon: IconChevronLeft,
-                    name: `${this.TuneNames.unindent}-${this.block?.id}`,
+                    name: `${this.TuneNames.indentLeft}-${this.block?.id}`,
                 },
             ]
 
         const html = /*html*/ `
 			<div class="${this.CSS.popoverItem} ${this.CSS.customPopoverItem}" data-item-name='indent'>
-				<button class="${this.CSS.popoverItemIcon}" data-unindent>${IconChevronLeft}</button>
+				<button class="${this.CSS.popoverItemIcon}" data-${this.TuneNames.indentLeft}>${IconChevronLeft}</button>
 				<div class="${this.CSS.popoverItemTitle}">${this.api.sanitizer.clean(this.api.i18n.t('Indent'), {})}</div>
-				<button class="${this.CSS.popoverItemIcon}" data-indent style="margin-left:10px;">${IconChevronRight}</button>
+				<button class="${this.CSS.popoverItemIcon}" data-${this.TuneNames.indentRight} style="margin-left:10px;">${IconChevronRight}</button>
 			</div>
 		`
 
         const item = new DOMParser().parseFromString(html, 'text/html').body.firstChild as HTMLElement
 
-        item.querySelector('[data-indent]')?.addEventListener('click', () => this.isDirectionInverted ? this.unIndentBlock() : this.indentBlock())
-        item.querySelector('[data-unindent]')?.addEventListener('click', () => this.isDirectionInverted ? this.indentBlock() : this.unIndentBlock())
+        item.querySelector(`[data-${this.TuneNames.indentRight}]`)?.addEventListener('click', () => this.handleIndentRight())
+        item.querySelector(`[data-${this.TuneNames.indentLeft}]`)?.addEventListener('click', () => this.handleIndentLeft())
 
         return item
     }
@@ -142,8 +144,8 @@ export default class IndentTune implements BlockTune {
 
     private get TuneNames() {
         return {
-            indent: 'tune-indent',
-            unindent: 'tune-unindent',
+            indentLeft: 'tune-indent-left',
+            indentRight: 'tune-indent-right',
         }
     }
 
@@ -217,6 +219,20 @@ export default class IndentTune implements BlockTune {
         })
     }
 
+    private handleIndentLeft() {
+        if (this.isDirectionInverted)
+            this.indentBlock();
+        else
+            this.unIndentBlock();
+    }
+
+    private handleIndentRight() {
+        if (this.isDirectionInverted)
+            this.unIndentBlock();
+        else
+            this.indentBlock();
+    }
+
     private indentBlock() {
         if (!this.wrapper) return
         this.data.indentLevel = Math.min(this.data.indentLevel + 1, this.maxIndent)
@@ -225,8 +241,9 @@ export default class IndentTune implements BlockTune {
 
         //disable tune
         this.getTuneButton('unindent')?.classList.remove(this.CSS.disabledItem)
-        if (this.data.indentLevel === this.maxIndent)
+        if (this.data.indentLevel === this.maxIndent) {
             this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
+        }
 
     }
 
@@ -238,21 +255,23 @@ export default class IndentTune implements BlockTune {
 
         // disable tune
         this.getTuneButton('indent')?.classList.remove(this.CSS.disabledItem)
-        if (this.data.indentLevel === this.minIndent) this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
+        if (this.data.indentLevel === this.minIndent) {
+            this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
+        }
     }
 
     private getTuneButton(indentType: 'indent' | 'unindent') {
-        let indentName = indentType;
+        let indentName: 'indentLeft' | "indentRight" = indentType === 'indent' ? "indentRight" : "indentLeft";
         if (this.isDirectionInverted)
-            indentName = indentType == 'indent' ? "unindent" : "indent";
+            indentName = indentType == 'indent' ? "indentLeft" : "indentRight";
 
         return this.config.orientation === 'vertical'
-            ? this.getTuneByName(`${this.TuneNames[indentName]}[data-item-name=${this.block?.id}]`)
-            : document.querySelector(`.${this.CSS.popoverItemIcon}[data-${indentName}]`)
+            ? this.getTuneByName(`${this.TuneNames[indentName]}-${this.block?.id}`)
+            : document.querySelector(`.${this.CSS.popoverItemIcon}[data-${this.TuneNames[indentName]}]`)
     }
 
     private getTuneByName(name: string) {
-        return document.querySelector(`.${this.CSS.popoverItem}[data-item-name=${name}]`)
+        return document.querySelector(`.${this.CSS.popoverItem}[data-item-name="${name}"]`)
     }
 
     private applyStylesToWrapper(wrapper: HTMLElement, indentLevel: number) {
