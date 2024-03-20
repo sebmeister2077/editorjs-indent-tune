@@ -4,14 +4,6 @@ import { IconChevronLeft, IconChevronRight } from '@codexteam/icons'
 import './index.css'
 
 const WRAPPER_NAME = 'data-block-indent-wrapper'
-type AlignmentTuneClass = {
-    /**
-     * Listeners to be called when the alignment changes.
-     * This should be a static method on your Alignment Tool class 
-     */
-    addChangeListener(listener: (blockId: string, direction: TextDirection) => void): void;
-    // removeChangeListener(listener: (blockId: string,  direction:"ltr"|"rtl") => void): void;
-}
 
 export type TextDirection = 'ltr' | "rtl"
 
@@ -25,7 +17,10 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
      */
     handleShortcut?: ((e: KeyboardEvent) => 'indent' | 'unindent' | undefined | void) | undefined;
     direction: TextDirection;
-    alignmentTune: AlignmentTuneClass | null;
+    /**
+     * Handle dynamic direction change (on each block level)
+     */
+    directionChangeHandler: null | ((listener: (blockId: string, direction: TextDirection) => void) => void);
 } & (
         | {
             tuneName: string
@@ -39,7 +34,7 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
 
 export type IndentData = { indentLevel: number }
 export default class IndentTune implements BlockTune {
-    static get isTune() {
+    public static get isTune() {
         return true
     }
 
@@ -62,15 +57,15 @@ export default class IndentTune implements BlockTune {
             customBlockIndentLimits: {},
             handleShortcut: undefined,
             direction: "ltr",
-            alignmentTune: null,
+            directionChangeHandler: null,
         }
         this.config = {
             ...defaultConfig,
             ...(config ?? {}),
         }
 
-        if (this.config?.alignmentTune) {
-            this.config.alignmentTune.addChangeListener(this.alignmentChangeListener.bind(this));
+        if (this.config?.directionChangeHandler) {
+            this.config.directionChangeHandler(this.alignmentChangeListener.bind(this));
         }
 
         const defaultIndentLevel = this.config.customBlockIndentLimits[this.block?.name ?? '']?.min ?? this.config.minIndent

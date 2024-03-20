@@ -1,13 +1,6 @@
 import { type BlockTune } from '@editorjs/editorjs';
 import { type BlockToolConstructorOptions, type TunesMenuConfig } from '@editorjs/editorjs/types/tools/index.js';
 import './index.css';
-type AlignmentTuneClass = {
-    /**
-     * Listeners to be called when the alignment changes.
-     * This should be a static method on your Alignment Tool class
-     */
-    addChangeListener(listener: (blockId: string, direction: TextDirection) => void): void;
-};
 export type TextDirection = 'ltr' | "rtl";
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>;
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
@@ -19,7 +12,10 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
      */
     handleShortcut?: ((e: KeyboardEvent) => 'indent' | 'unindent' | undefined | void) | undefined;
     direction: TextDirection;
-    alignmentTune: AlignmentTuneClass | null;
+    /**
+     * Handle dynamic direction change (on each block level)
+     */
+    directionChangeHandler: null | ((listener: (blockId: string, direction: TextDirection) => void) => void);
 } & ({
     tuneName: string;
     multiblock: true;
@@ -60,4 +56,3 @@ export default class IndentTune implements BlockTune {
     private getWrapperBlockById;
     private alignmentChangeListener;
 }
-export {};
