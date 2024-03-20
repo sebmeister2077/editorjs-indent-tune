@@ -103,15 +103,39 @@ const editor = new EditorJS({
 })
 ```
 
+What if my editor also has a text alignment tune?
+
+```ts
+class MyAlignmentTuneClass /* extends maybe some other class? */ {
+    private block
+    constructor({ block }) {
+        this.block = block
+    }
+    // ...
+
+    private static listeners = new Set()
+    public static addChangeListener(listener: (blockId: string, direction: 'ltr' | 'rtl') => void) {
+        MyAlignmentTuneClass.listeners.add(l)
+    }
+
+    // ...
+    private onChange(alignment) {
+        MyAlignmentTuneClass.listeners.forEach((l) => l(this.block.id, alignment == 'left' ? 'ltr' : 'rtl'))
+    }
+}
+```
+
 ## Config Params (optional)
 
-| Field                   | Type                                                                 | Description                                                                          | Default      |
-| ----------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------ |
-| indentSize              | `number`                                                             | Size of one indent level (in pixels)                                                 | `24`         |
-| maxIndent               | `number`                                                             | The upper indent limit of any block                                                  | `8`          |
-| minIndent               | `number`                                                             | The lower indent limit of any block                                                  | `0`          |
-| orientation             | `'horizontal' \| 'vertical'`                                         | The UI design for how you want the toolbox to be displayed                           | `horizontal` |
-| customBlockIndentLimits | `Record<string, Partial<Record<'min' \| 'max', number>>>`            | A set of overrides of the indent limit for each type of block                        | `{}`         |
-| multiblock              | `boolean`                                                            | Marks if you can indent multiple blocks at a time                                    | `false`      |
-| tuneName                | `string \| null`                                                     | This is required for multiblock to work                                              | `null`       |
-| handleShortcut          | `((e:KeyboardEvent) => 'unindent' \| 'indent' \| void) \| undefined` | Custom shortcut function that allows overriding the default indenting using keyboard | `undefined`  |
+| Field                   | Type                                                                 | Description                                                                                                                            | Default      |
+| ----------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| indentSize              | `number`                                                             | Size of one indent level (in pixels)                                                                                                   | `24`         |
+| maxIndent               | `number`                                                             | The upper indent limit of any block                                                                                                    | `8`          |
+| minIndent               | `number`                                                             | The lower indent limit of any block                                                                                                    | `0`          |
+| orientation             | `'horizontal' \| 'vertical'`                                         | The UI design for how you want the toolbox to be displayed                                                                             | `horizontal` |
+| customBlockIndentLimits | `Record<string, Partial<Record<'min' \| 'max', number>>>`            | A set of overrides of the indent limit for each type of block                                                                          | `{}`         |
+| multiblock              | `boolean`                                                            | Marks if you can indent multiple blocks at a time                                                                                      | `false`      |
+| tuneName                | `string \| null`                                                     | This is required for multiblock to work                                                                                                | `null`       |
+| handleShortcut          | `((e:KeyboardEvent) => 'unindent' \| 'indent' \| void) \| undefined` | Custom shortcut function that allows overriding the default indenting using keyboard                                                   | `undefined`  |
+| direction               | `'ltr' \| 'rtl' `                                                    | Specify the global direction of the indents                                                                                            | `ltr`        |
+| alignmentTune           | `null \| ExtendedAlignmentTuneClass`                                 | If provided will add a listener to the alignment class and apply visual changes (indent direction) based on the provided change value. | `null`       |
