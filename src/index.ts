@@ -86,30 +86,39 @@ export default class IndentTune implements BlockTune {
 
     public render(): HTMLElement | TunesMenuConfig {
         //Disable items after they are rendered synchronously
-        setTimeout(() => {
+        queueMicrotask(() => {
             if (this.data.indentLevel == this.maxIndent)
                 this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
             if (this.data.indentLevel == this.minIndent)
                 this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
-        }, 0)
+        })
 
-        const indentText = 'Indent'
-        const unIndentText = 'Un Indent'
-        if (this.config.orientation === 'vertical')
+
+        if (this.config.orientation === 'vertical') {
+            const leftElementName = `${this.TuneNames.indentLeft}-${this.block?.id}`;
+            const rightElementName = `${this.TuneNames.indentRight}-${this.block?.id}`
             return [
                 {
-                    title: this.api.i18n.t(this.isDirectionInverted ? unIndentText : indentText),
-                    onActivate: (item, event) => this.handleIndentRight(),
+                    title: this.rightText,
+                    onActivate: (item, event) => {
+                        this.handleIndentRight();
+                        // override editorjs internal title copy
+                        item.title = this.rightText;
+                    },
                     icon: IconChevronRight,
-                    name: `${this.TuneNames.indentRight}-${this.block?.id}`,
+                    name: rightElementName,
                 },
                 {
-                    title: this.api.i18n.t(this.isDirectionInverted ? indentText : unIndentText),
-                    onActivate: (item, event) => this.handleIndentLeft(),
+                    title: this.leftText,
+                    onActivate: (item, event) => {
+                        this.handleIndentLeft()
+                        item.title = this.leftText;
+                    },
                     icon: IconChevronLeft,
-                    name: `${this.TuneNames.indentLeft}-${this.block?.id}`,
+                    name: leftElementName,
                 },
             ]
+        }
 
         const html = /*html*/ `
 			<div class="${this.CSS.popoverItem} ${this.CSS.customPopoverItem}" data-item-name='indent'>
@@ -173,6 +182,14 @@ export default class IndentTune implements BlockTune {
 
     private get isDirectionInverted() {
         return this.config.direction !== 'ltr'; // also ignore invalid directions
+    }
+
+    private get rightText() {
+        return this.api.i18n.t(this.isDirectionInverted ? 'Un Indent' : 'Indent')
+    }
+
+    private get leftText() {
+        return this.api.i18n.t(this.isDirectionInverted ? 'Indent' : 'Un Indent')
     }
 
     private onKeyDown(e: KeyboardEvent) {
@@ -289,6 +306,10 @@ export default class IndentTune implements BlockTune {
         return document.querySelector(`.${this.CSS.popoverItem}[data-item-name="${name}"]`)
     }
 
+    private getTuneTitleByName(name: string) {
+        return this.getTuneByName(name)?.querySelector(`.${this.CSS.popoverItemTitle}`)
+    }
+
     private applyStylesToWrapper(wrapper: HTMLElement, indentLevel: number) {
         const indentValuePixels = `${indentLevel * this.config.indentSize}px`
         if (this.isDirectionInverted) {
@@ -320,5 +341,14 @@ export default class IndentTune implements BlockTune {
         this.config.direction = direction;
         this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
         this.toggleDisableStateForButtons()
+        if (this.config.orientation === 'vertical') {
+            // I have to update the text for the indent options 😪
+
+            const indentRightBtnTitle = this.getTuneTitleByName(`${this.TuneNames.indentRight}-${this.block?.id}`);
+            if (indentRightBtnTitle) indentRightBtnTitle.textContent = this.rightText
+
+            const indentLeftBtnTitle = this.getTuneTitleByName(`${this.TuneNames.indentLeft}-${this.block?.id}`);
+            if (indentLeftBtnTitle) indentLeftBtnTitle.textContent = this.leftText
+        }
     }
 }

@@ -43,6 +43,8 @@ export default class IndentTune implements BlockTune {
     private get maxIndent();
     private get minIndent();
     private get isDirectionInverted();
+    private get rightText();
+    private get leftText();
     private onKeyDown;
     private handleIndentLeft;
     private handleIndentRight;
@@ -51,6 +53,7 @@ export default class IndentTune implements BlockTune {
     private toggleDisableStateForButtons;
     private getTuneButton;
     private getTuneByName;
+    private getTuneTitleByName;
     private applyStylesToWrapper;
     private getGlobalSelectedBlocks;
     private getWrapperBlockById;
