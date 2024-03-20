@@ -4,6 +4,16 @@ import { IconChevronLeft, IconChevronRight } from '@codexteam/icons'
 import './index.css'
 
 const WRAPPER_NAME = 'data-block-indent-wrapper'
+type AlignmentTuneClass = {
+    /**
+     * Listeners to be called when the alignment changes.
+     * This should be a static method on your Alignment Tool class 
+     */
+    addChangeListener(listener: (blockId: string, direction: TextDirection) => void): void;
+    // removeChangeListener(listener: (blockId: string,  direction:"ltr"|"rtl") => void): void;
+}
+
+export type TextDirection = 'ltr' | "rtl"
 
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
@@ -14,7 +24,8 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
      * Return 'indent' or 'unindent' if you want to change the current indentation
      */
     handleShortcut?: ((e: KeyboardEvent) => 'indent' | 'unindent' | undefined | void) | undefined;
-    direction: "ltr" | "rtl";
+    direction: TextDirection;
+    alignmentTune: AlignmentTuneClass | null;
 } & (
         | {
             tuneName: string
@@ -36,7 +47,7 @@ export default class IndentTune implements BlockTune {
     private block: BlockAPI | undefined
     private config: IndentTuneConfigOptions
     public data: IndentData
-    private wrapper: HTMLElement | null = null
+    private wrapper: HTMLElement = document.createElement('div')
     constructor({ api, data, config, block }: BlockToolConstructorOptions<IndentData, IndentTuneConfigOptions>) {
         this.api = api
         this.block = block
@@ -51,10 +62,15 @@ export default class IndentTune implements BlockTune {
             customBlockIndentLimits: {},
             handleShortcut: undefined,
             direction: "ltr",
+            alignmentTune: null,
         }
         this.config = {
             ...defaultConfig,
             ...(config ?? {}),
+        }
+
+        if (this.config?.alignmentTune) {
+            this.config.alignmentTune.addChangeListener(this.alignmentChangeListener.bind(this));
         }
 
         const defaultIndentLevel = this.config.customBlockIndentLimits[this.block?.name ?? '']?.min ?? this.config.minIndent
@@ -117,7 +133,6 @@ export default class IndentTune implements BlockTune {
     }
 
     public wrap(pluginsContent: HTMLElement): HTMLElement {
-        this.wrapper = document.createElement('div')
         this.wrapper.appendChild(pluginsContent)
         this.wrapper.setAttribute(WRAPPER_NAME, '')
 
@@ -241,12 +256,7 @@ export default class IndentTune implements BlockTune {
 
         this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
 
-        //disable tune
-        this.getTuneButton('unindent')?.classList.remove(this.CSS.disabledItem)
-        if (this.data.indentLevel === this.maxIndent) {
-            this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
-        }
-
+        this.toggleDisableStateForButtons()
     }
 
     private unIndentBlock() {
@@ -255,11 +265,19 @@ export default class IndentTune implements BlockTune {
 
         this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
 
-        // disable tune
-        this.getTuneButton('indent')?.classList.remove(this.CSS.disabledItem)
-        if (this.data.indentLevel === this.minIndent) {
+        this.toggleDisableStateForButtons()
+    }
+
+    private toggleDisableStateForButtons() {
+        if (this.data.indentLevel === this.minIndent)
             this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
-        }
+        else
+            this.getTuneButton('unindent')?.classList.remove(this.CSS.disabledItem)
+
+        if (this.data.indentLevel === this.maxIndent)
+            this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
+        else
+            this.getTuneButton('indent')?.classList.remove(this.CSS.disabledItem)
     }
 
     private getTuneButton(indentType: 'indent' | 'unindent') {
@@ -297,5 +315,15 @@ export default class IndentTune implements BlockTune {
 
     private getWrapperBlockById(blockId: string) {
         return document.querySelector(`.ce-block[data-id="${blockId}"] [${WRAPPER_NAME}]`)
+    }
+
+    private alignmentChangeListener(blockId: string, direction: TextDirection) {
+        if (blockId !== this.block?.id) return;
+        const hasDirectionChanged = direction !== this.config.direction
+        if (!hasDirectionChanged) return
+
+        this.config.direction = direction;
+        this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
+        this.toggleDisableStateForButtons()
     }
 }

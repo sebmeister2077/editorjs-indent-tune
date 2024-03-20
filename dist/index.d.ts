@@ -1,6 +1,14 @@
 import { type BlockTune } from '@editorjs/editorjs';
 import { type BlockToolConstructorOptions, type TunesMenuConfig } from '@editorjs/editorjs/types/tools/index.js';
 import './index.css';
+type AlignmentTuneClass = {
+    /**
+     * Listeners to be called when the alignment changes.
+     * This should be a static method on your Alignment Tool class
+     */
+    addChangeListener(listener: (blockId: string, direction: TextDirection) => void): void;
+};
+export type TextDirection = 'ltr' | "rtl";
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>;
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
     orientation: 'horizontal' | 'vertical';
@@ -10,7 +18,8 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
      * Return 'indent' or 'unindent' if you want to change the current indentation
      */
     handleShortcut?: ((e: KeyboardEvent) => 'indent' | 'unindent' | undefined | void) | undefined;
-    direction: "ltr" | "rtl";
+    direction: TextDirection;
+    alignmentTune: AlignmentTuneClass | null;
 } & ({
     tuneName: string;
     multiblock: true;
@@ -43,9 +52,12 @@ export default class IndentTune implements BlockTune {
     private handleIndentRight;
     private indentBlock;
     private unIndentBlock;
+    private toggleDisableStateForButtons;
     private getTuneButton;
     private getTuneByName;
     private applyStylesToWrapper;
     private getGlobalSelectedBlocks;
     private getWrapperBlockById;
+    private alignmentChangeListener;
 }
+export {};
