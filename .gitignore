@@ -1,4 +1,4 @@
-local-testing.*
+local-testing*
 
 node_modules/
 package-lock.json

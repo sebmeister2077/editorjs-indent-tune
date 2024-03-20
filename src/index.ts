@@ -224,6 +224,7 @@ export default class IndentTune implements BlockTune {
             this.indentBlock();
         else
             this.unIndentBlock();
+        this.block?.dispatchChange()
     }
 
     private handleIndentRight() {
@@ -231,6 +232,7 @@ export default class IndentTune implements BlockTune {
             this.unIndentBlock();
         else
             this.indentBlock();
+        this.block?.dispatchChange()
     }
 
     private indentBlock() {
