@@ -10,7 +10,7 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
      * Custom keyboard indent handler.
      * Return 'indent' or 'unindent' if you want to change the current indentation
      */
-    handleShortcut?: ((e: KeyboardEvent) => 'indent' | 'unindent' | undefined | void) | undefined;
+    handleShortcut?: ((e: KeyboardEvent, blockId: string) => 'indent' | 'unindent' | "default" | undefined) | undefined;
     direction: TextDirection;
     /**
      * Handle dynamic direction change (on each block level)
@@ -33,6 +33,7 @@ export default class IndentTune implements BlockTune {
     private config;
     data: IndentData;
     private wrapper;
+    private DEFAULT_INDENT_KEY;
     constructor({ api, data, config, block }: BlockToolConstructorOptions<IndentData, IndentTuneConfigOptions>);
     render(): HTMLElement | TunesMenuConfig;
     wrap(pluginsContent: HTMLElement): HTMLElement;

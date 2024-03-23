@@ -15,7 +15,7 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
      * Custom keyboard indent handler.
      * Return 'indent' or 'unindent' if you want to change the current indentation
      */
-    handleShortcut?: ((e: KeyboardEvent) => 'indent' | 'unindent' | undefined | void) | undefined;
+    handleShortcut?: ((e: KeyboardEvent, blockId: string) => 'indent' | 'unindent' | "default" | undefined) | undefined;
     direction: TextDirection;
     /**
      * Handle dynamic direction change (on each block level)
@@ -43,6 +43,7 @@ export default class IndentTune implements BlockTune {
     private config: IndentTuneConfigOptions
     public data: IndentData
     private wrapper: HTMLElement = document.createElement('div')
+    private DEFAULT_INDENT_KEY = 'Tab';
     constructor({ api, data, config, block }: BlockToolConstructorOptions<IndentData, IndentTuneConfigOptions>) {
         this.api = api
         this.block = block
@@ -193,23 +194,37 @@ export default class IndentTune implements BlockTune {
     }
 
     private onKeyDown(e: KeyboardEvent) {
+        if (!this.block?.id) return;
         const omitDefaultBehaviour = Boolean(this.config.handleShortcut)
-        if (!omitDefaultBehaviour && e.key !== 'Tab') return
-        const handled = this.config.handleShortcut?.(e)
-        if (handled && omitDefaultBehaviour) return
+        if (!omitDefaultBehaviour && e.key !== this.DEFAULT_INDENT_KEY) return
+        const handled = this.config.handleShortcut?.(e, this.block.id)
+        if (!handled && omitDefaultBehaviour) return
+
+        let isIndent: boolean;
+        switch (handled) {
+            case 'indent':
+                isIndent = true;
+                break
+            case 'unindent':
+                isIndent = false;
+                break;
+            case 'default':
+            default:
+                if (e.key !== this.DEFAULT_INDENT_KEY) return;
+                isIndent = !e.shiftKey
+        }
 
         e.stopPropagation()
         e.preventDefault()
 
         //this might be still open
         this.api.inlineToolbar.close()
-        const isIndent = handled ? handled === 'indent' : !e.shiftKey
         const blocks = this.getGlobalSelectedBlocks()
 
         if (!this.config.multiblock || blocks.length < 2) {
             if (isIndent) this.indentBlock()
             else this.unIndentBlock()
-            this.block?.dispatchChange()
+            this.block.dispatchChange()
             return
         }
 
