@@ -219,9 +219,9 @@ export default class IndentTune implements BlockTune {
 
         //this might be still open
         this.api.inlineToolbar.close()
-        const blocks = this.getGlobalSelectedBlocks()
-
-        if (!this.config.multiblock || blocks.length < 2) {
+        const selectedBlocks = this.getGlobalSelectedBlocks()
+        const isSingleLineBlock = !this.config.multiblock || selectedBlocks.length < 2
+        if (isSingleLineBlock) {
             if (isIndent) this.indentBlock()
             else this.unIndentBlock()
             this.block.dispatchChange()
@@ -233,7 +233,7 @@ export default class IndentTune implements BlockTune {
             return
         }
 
-        blocks.forEach(async (b) => {
+        selectedBlocks.forEach(async (b) => {
             //get block indent level
             const savedData = await b.save()
             if (!savedData) return
