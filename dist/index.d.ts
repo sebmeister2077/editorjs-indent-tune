@@ -4,6 +4,9 @@ import './index.css';
 export type TextDirection = 'ltr' | "rtl";
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>;
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
+    highlightIndent?: {
+        className?: string;
+    };
     orientation: 'horizontal' | 'vertical';
     customBlockIndentLimits: Record<string, Partial<Record<'min' | 'max', number>>>;
     /**
@@ -40,6 +43,7 @@ export default class IndentTune implements BlockTune {
     wrap(pluginsContent: HTMLElement): HTMLElement;
     save(): IndentData;
     private get CSS();
+    private get EditorCSS();
     private get TuneNames();
     private get customInterval();
     private get maxIndent();
@@ -60,4 +64,5 @@ export default class IndentTune implements BlockTune {
     private getGlobalSelectedBlocks;
     private getWrapperBlockById;
     private alignmentChangeListener;
+    private createElementFromTemplate;
 }

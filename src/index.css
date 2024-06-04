@@ -1,6 +1,7 @@
 .ce-popover-indent-item {
     cursor: default !important;
 }
+
 .ce-popover-indent-item:hover {
     background-color: transparent !important;
 }
@@ -31,4 +32,19 @@
 
 .ce-popover-indent-item .ce-popover-item__icon:hover {
     background-color: var(--color-background-item-hover, #eff2f5);
+}
+
+/*TODOpickoutsomedefaultstyles*/
+.ce-highlight-indent {
+    background-color: green;
+    opacity: 0.5;
+    display: inline-block;
+    height: 1.6em;
+    top: 50%;
+    position: absolute;
+    transform: translate(0px, -50%);
+    -webkit-transform: translate(0px, -50%);
+    -moz-transform: translate(0px, -50%);
+    -ms-transform: translate(0px, -50%);
+    -o-transform: translate(0px, -50%);
 }

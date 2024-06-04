@@ -9,6 +9,7 @@ export type TextDirection = 'ltr' | "rtl"
 
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
+    highlightIndent?: { className?: string };
     orientation: 'horizontal' | 'vertical';
     customBlockIndentLimits: Record<string, Partial<Record<'min' | 'max', number>>>;
     /**
@@ -130,7 +131,7 @@ export default class IndentTune implements BlockTune {
 			</div>
 		`
 
-        const item = new DOMParser().parseFromString(html, 'text/html').body.firstChild as HTMLElement
+        const item = this.createElementFromTemplate(html);
 
         item.querySelector(`[data-${this.TuneNames.indentRight}]`)?.addEventListener('click', () => this.handleIndentRight())
         item.querySelector(`[data-${this.TuneNames.indentLeft}]`)?.addEventListener('click', () => this.handleIndentLeft())
@@ -141,6 +142,14 @@ export default class IndentTune implements BlockTune {
     public wrap(pluginsContent: HTMLElement): HTMLElement {
         this.wrapper.appendChild(pluginsContent)
         this.wrapper.setAttribute(WRAPPER_NAME, '')
+        if (this.config.highlightIndent) {
+            const highlightEl = this.createElementFromTemplate(/*html*/`
+                <div class="${this.config.highlightIndent.className ?? ""} ${this.CSS.highlightIndent}">
+                </div>
+            `);
+            const contentEl = pluginsContent.classList.contains(this.EditorCSS.content) ? pluginsContent : pluginsContent.querySelector(`.${this.EditorCSS.content}`)
+            contentEl?.appendChild(highlightEl);
+        }
 
         this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
 
@@ -160,6 +169,13 @@ export default class IndentTune implements BlockTune {
             popoverItemIcon: 'ce-popover-item__icon',
             popoverItemTitle: 'ce-popover-item__title',
             disabledItem: 'ce-popover-item--disabled',
+            highlightIndent: "ce-highlight-indent",
+        }
+    }
+    private get EditorCSS() {
+        return {
+            block: "ce-block",
+            content: "ce-block__content",
         }
     }
 
@@ -334,13 +350,29 @@ export default class IndentTune implements BlockTune {
     }
 
     private applyStylesToWrapper(wrapper: HTMLElement, indentLevel: number) {
-        const indentValuePixels = `${indentLevel * this.config.indentSize}px`
+        const indentValue = indentLevel * this.config.indentSize;
+        const indentValuePixels = `${indentValue}px`;
+        const indentValuePixelsForPadding = `${indentValue * 2}px`;
+
+        const highlightElement = wrapper.querySelector(`.${this.CSS.highlightIndent}`)
         if (this.isDirectionInverted) {
             wrapper.style.paddingLeft = '0px';
-            wrapper.style.paddingRight = indentValuePixels;
+            wrapper.style.paddingRight = indentValuePixelsForPadding;
         } else {
-            wrapper.style.paddingLeft = indentValuePixels;
+            wrapper.style.paddingLeft = indentValuePixelsForPadding;
             wrapper.style.paddingRight = "0px";
+        }
+        if (!(highlightElement instanceof HTMLElement)) return;
+
+        if (this.isDirectionInverted) {
+            highlightElement.style.width = indentValuePixels;
+            highlightElement.style.left = "100%";
+            highlightElement.style.right = '';
+        }
+        else {
+            highlightElement.style.width = indentValuePixels;
+            highlightElement.style.left = "";
+            highlightElement.style.right = '100%';
         }
     }
 
@@ -353,7 +385,7 @@ export default class IndentTune implements BlockTune {
     }
 
     private getWrapperBlockById(blockId: string) {
-        return document.querySelector(`.ce-block[data-id="${blockId}"] [${WRAPPER_NAME}]`)
+        return document.querySelector(`.${this.EditorCSS.block}[data-id="${blockId}"] [${WRAPPER_NAME}]`)
     }
 
     private alignmentChangeListener(blockId: string, direction: TextDirection) {
@@ -373,5 +405,9 @@ export default class IndentTune implements BlockTune {
             const indentLeftBtnTitle = this.getTuneTitleByName(`${this.TuneNames.indentLeft}-${this.block?.id}`);
             if (indentLeftBtnTitle) indentLeftBtnTitle.textContent = this.leftText
         }
+    }
+
+    private createElementFromTemplate(template: string): HTMLElement {
+        return new DOMParser().parseFromString(template, 'text/html').body.firstChild as HTMLElement;
     }
 }
