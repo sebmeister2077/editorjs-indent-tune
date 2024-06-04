@@ -15,7 +15,7 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
      * Custom keyboard indent handler.
      * Return 'indent' or 'unindent' if you want to change the current indentation
      */
-    handleShortcut?: ((e: KeyboardEvent, blockId: string) => 'indent' | 'unindent' | "default" | undefined) | undefined;
+    handleShortcut?: ((e: KeyboardEvent, blockId: string) => 'indent' | 'unindent' | "default" | undefined | false) | undefined | false;
     direction: TextDirection;
     /**
      * Handle dynamic direction change (on each block level)
@@ -197,6 +197,7 @@ export default class IndentTune implements BlockTune {
         if (!this.block?.id) return;
         const omitDefaultBehaviour = Boolean(this.config.handleShortcut)
         if (!omitDefaultBehaviour && e.key !== this.DEFAULT_INDENT_KEY) return
+        if (!omitDefaultBehaviour && e.key === this.DEFAULT_INDENT_KEY) return
         const handled = this.config.handleShortcut?.(e, this.block.id)
         if (!handled && omitDefaultBehaviour) return
 
@@ -334,6 +335,7 @@ export default class IndentTune implements BlockTune {
             wrapper.style.paddingLeft = indentValuePixels;
             wrapper.style.paddingRight = "0px";
         }
+        wrapper.classList.add('ce-block-indent-wrapper');
     }
 
     private getGlobalSelectedBlocks() {
