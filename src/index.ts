@@ -199,11 +199,14 @@ export default class IndentTune implements BlockTune {
         // omit key shortcut entirely
         if (this.config.handleShortcut === false) return;
 
-        const omitDefaultBehaviour = typeof this.config.handleShortcut === 'function'
-        if (!omitDefaultBehaviour && e.key !== this.DEFAULT_INDENT_KEY) return
+        const isDefaultKeyPressed = e.key == this.DEFAULT_INDENT_KEY
+        const isCustomBehaviourDefined = typeof this.config.handleShortcut === 'function'
+
+        if (!isCustomBehaviourDefined && !isDefaultKeyPressed) return
 
         const handledCommand = this.config.handleShortcut?.(e, this.block.id)
-        if (!handledCommand && omitDefaultBehaviour) return
+        const shouldIgnoreKeyPress = !handledCommand && isCustomBehaviourDefined
+        if (shouldIgnoreKeyPress) return
 
         let isIndent: boolean;
         switch (handledCommand) {
@@ -215,7 +218,7 @@ export default class IndentTune implements BlockTune {
                 break;
             case 'default':
             default:
-                if (e.key !== this.DEFAULT_INDENT_KEY) return;
+                if (!isDefaultKeyPressed) return;
                 isIndent = !e.shiftKey
         }
 
