@@ -15,7 +15,7 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
      * Custom keyboard indent handler.
      * Return 'indent' or 'unindent' if you want to change the current indentation
      */
-    handleShortcut?: ((e: KeyboardEvent, blockId: string) => 'indent' | 'unindent' | "default" | undefined | false) | undefined | false;
+    handleShortcut?: ((e: KeyboardEvent, blockId: string) => 'indent' | 'unindent' | "default" | undefined | false) | undefined;
     direction: TextDirection;
     /**
      * Handle dynamic direction change (on each block level)
