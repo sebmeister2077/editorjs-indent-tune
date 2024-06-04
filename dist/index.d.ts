@@ -8,9 +8,10 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
     customBlockIndentLimits: Record<string, Partial<Record<'min' | 'max', number>>>;
     /**
      * Custom keyboard indent handler.
-     * Return 'indent' or 'unindent' if you want to change the current indentation
+     * Return 'indent' or 'unindent' if you want to change the current indentation.
+     * Return 'undefined' or pass 'false' instead of a function to disable the shortcut entirely
      */
-    handleShortcut?: ((e: KeyboardEvent, blockId: string) => 'indent' | 'unindent' | "default" | undefined) | undefined;
+    handleShortcut?: ((e: KeyboardEvent, blockId: string) => 'indent' | 'unindent' | "default" | undefined) | undefined | false;
     direction: TextDirection;
     /**
      * Handle dynamic direction change (on each block level)

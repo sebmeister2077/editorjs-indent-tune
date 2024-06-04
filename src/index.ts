@@ -13,9 +13,10 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
     customBlockIndentLimits: Record<string, Partial<Record<'min' | 'max', number>>>;
     /**
      * Custom keyboard indent handler.
-     * Return 'indent' or 'unindent' if you want to change the current indentation
+     * Return 'indent' or 'unindent' if you want to change the current indentation.
+     * Return 'undefined' or pass 'false' instead of a function to disable the shortcut entirely
      */
-    handleShortcut?: ((e: KeyboardEvent, blockId: string) => 'indent' | 'unindent' | "default" | undefined) | undefined;
+    handleShortcut?: ((e: KeyboardEvent, blockId: string) => 'indent' | 'unindent' | "default" | undefined) | undefined | false;
     direction: TextDirection;
     /**
      * Handle dynamic direction change (on each block level)
@@ -195,13 +196,17 @@ export default class IndentTune implements BlockTune {
 
     private onKeyDown(e: KeyboardEvent) {
         if (!this.block?.id) return;
-        const omitDefaultBehaviour = Boolean(this.config.handleShortcut)
+        // omit key shortcut entirely
+        if (this.config.handleShortcut === false) return;
+
+        const omitDefaultBehaviour = typeof this.config.handleShortcut === 'function'
         if (!omitDefaultBehaviour && e.key !== this.DEFAULT_INDENT_KEY) return
-        const handled = this.config.handleShortcut?.(e, this.block.id)
-        if (!handled && omitDefaultBehaviour) return
+
+        const handledCommand = this.config.handleShortcut?.(e, this.block.id)
+        if (!handledCommand && omitDefaultBehaviour) return
 
         let isIndent: boolean;
-        switch (handled) {
+        switch (handledCommand) {
             case 'indent':
                 isIndent = true;
                 break
