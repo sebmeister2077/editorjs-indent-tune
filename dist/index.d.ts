@@ -32,6 +32,7 @@ export type IndentData = {
 };
 export default class IndentTune implements BlockTune {
     static get isTune(): boolean;
+    private DATA_INDENT_LEVEL;
     private api;
     private block;
     private config;
@@ -65,4 +66,6 @@ export default class IndentTune implements BlockTune {
     private getWrapperBlockById;
     private alignmentChangeListener;
     private createElementFromTemplate;
+    private cachedMaxWidthForContent;
+    private get maxWidthForContent();
 }

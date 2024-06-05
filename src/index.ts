@@ -39,7 +39,7 @@ export default class IndentTune implements BlockTune {
     public static get isTune() {
         return true
     }
-
+    private DATA_INDENT_LEVEL = "data-indent-level"
     private api: API
     private block: BlockAPI | undefined
     private config: IndentTuneConfigOptions
@@ -351,19 +351,25 @@ export default class IndentTune implements BlockTune {
 
     private applyStylesToWrapper(wrapper: HTMLElement, indentLevel: number) {
         const indentValue = indentLevel * this.config.indentSize;
-        const indentValuePixels = `${indentValue}px`;
-        const indentValuePixelsForPadding = `${indentValue * 2}px`;
+        const contentElement = wrapper.querySelector(`.${this.EditorCSS.content}`);
+        if (!(contentElement instanceof HTMLElement)) return;
+
+        const { marginInline } = window.getComputedStyle(contentElement)
+        const marginInlineValue = parseInt(marginInline);
+        const previousIndentLevel = parseInt(wrapper.getAttribute(this.DATA_INDENT_LEVEL) ?? "0");
+
+        const indentValuePixels = `${indentValue * 2}px`;
 
         const highlightElement = wrapper.querySelector(`.${this.CSS.highlightIndent}`)
         if (this.isDirectionInverted) {
             wrapper.style.paddingLeft = '0px';
-            wrapper.style.paddingRight = indentValuePixelsForPadding;
+            wrapper.style.paddingRight = indentValuePixels;
         } else {
-            wrapper.style.paddingLeft = indentValuePixelsForPadding;
+            wrapper.style.paddingLeft = indentValuePixels;
             wrapper.style.paddingRight = "0px";
         }
+        wrapper.setAttribute(this.DATA_INDENT_LEVEL, indentLevel.toString());
         if (!(highlightElement instanceof HTMLElement)) return;
-
         if (this.isDirectionInverted) {
             highlightElement.style.width = indentValuePixels;
             highlightElement.style.left = "100%";
@@ -409,5 +415,32 @@ export default class IndentTune implements BlockTune {
 
     private createElementFromTemplate(template: string): HTMLElement {
         return new DOMParser().parseFromString(template, 'text/html').body.firstChild as HTMLElement;
+    }
+
+    private cachedMaxWidthForContent: number | null = null;
+    private get maxWidthForContent(): number {
+        if (this.cachedMaxWidthForContent !== null) return this.cachedMaxWidthForContent
+        for (let i = 0; i < document.styleSheets.length; i++) {
+            const styleSheet = document.styleSheets.item(i);
+            if (!styleSheet || !(styleSheet.ownerNode instanceof HTMLStyleElement) || styleSheet.ownerNode.id !== "editor-js-styles") continue;
+
+            for (let j = 0; j < styleSheet.cssRules.length; j++) {
+                const rule = styleSheet.cssRules.item(j);
+                if (!rule) continue;
+                const selector = `.${this.EditorCSS.content}`
+                if (!rule.cssText.startsWith(selector + " {") && (rule as { selectorText?: string }).selectorText !== selector)
+                    continue;
+                const matches = /max-width: [\d]+px;/.exec(rule.cssText)
+                if (!matches || !matches.length) continue;
+
+                const maxWidth = parseInt(matches[0].replace("max-width:", ''));
+                this.cachedMaxWidthForContent = maxWidth;
+                return this.maxWidthForContent;
+            }
+
+        }
+        console.warn("Cannot detect EditorJs max width for content. Please contact package author")
+        this.cachedMaxWidthForContent = 650;
+        return this.cachedMaxWidthForContent;
     }
 }
