@@ -8,7 +8,7 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
         className?: string;
         /**
          * Tunes you want to apply highlight for.
-         * Defaults to all if null.
+         * Defaults to all.
          */
         tuneNames?: string[];
     };

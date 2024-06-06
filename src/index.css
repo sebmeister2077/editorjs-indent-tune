@@ -34,10 +34,19 @@
     background-color: var(--color-background-item-hover, #eff2f5);
 }
 
+[data-block-indent-wrapper] {
+    will-change: padding-left, padding-right;
+    transition: padding-left .4s, padding-right .4s;
+    -webkit-transition: padding-left .4s, padding-right .4s;
+    -moz-transition: padding-left .4s, padding-right .4s;
+    -ms-transition: padding-left .4s, padding-right .4s;
+    -o-transition: padding-left .4s, padding-right .4s;
+}
+
 .ce-highlight-indent {
     opacity: 0.5;
-    will-change: background-color;
-    transition: background-color .4s;
+    will-change: background-color, width;
+    transition: background-color .4s, width .4s;
     display: inline-block;
     height: 1.6em;
     top: 50%;
@@ -47,10 +56,10 @@
     -moz-transform: translate(0px, -50%);
     -ms-transform: translate(0px, -50%);
     -o-transform: translate(0px, -50%);
-    -webkit-transition: background-color .4s;
-    -moz-transition: background-color .4s;
-    -ms-transition: background-color .4s;
-    -o-transition: background-color .4s;
+    -webkit-transition: background-color .4s, width .4s;
+    -moz-transition: background-color .4s, width .4s;
+    -ms-transition: background-color .4s, width .4s;
+    -o-transition: background-color .4s, width .4s;
 }
 
 [data-block-indent-wrapper][data-focused] .ce-highlight-indent {
