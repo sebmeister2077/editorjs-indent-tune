@@ -3,7 +3,6 @@ import { type BlockToolConstructorOptions, type TunesMenuConfig } from '@editorj
 import { IconChevronLeft, IconChevronRight } from '@codexteam/icons'
 import './index.css'
 
-const WRAPPER_NAME = 'data-block-indent-wrapper'
 
 export type TextDirection = 'ltr' | "rtl"
 
@@ -46,6 +45,8 @@ export default class IndentTune implements BlockTune {
     public static get isTune() {
         return true
     }
+    public static WRAPPER_NAME = 'data-block-indent-wrapper'
+    private DATA_FOCUSED = 'data-focused'
     private DATA_INDENT_LEVEL = "data-indent-level"
     private api: API
     private block: BlockAPI | undefined
@@ -148,7 +149,7 @@ export default class IndentTune implements BlockTune {
 
     public wrap(pluginsContent: HTMLElement): HTMLElement {
         this.wrapper.appendChild(pluginsContent)
-        this.wrapper.setAttribute(WRAPPER_NAME, '')
+        this.wrapper.setAttribute(IndentTune.WRAPPER_NAME, '')
 
         const ignoreBlockHighlight = Boolean(!this.config.highlightIndent || this.block?.name && this.config.highlightIndent?.tuneNames?.includes(this.block.name));
 
@@ -164,6 +165,8 @@ export default class IndentTune implements BlockTune {
         this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
 
         this.wrapper.addEventListener('keydown', (...args) => this.onKeyDown.apply(this, args), { capture: true })
+        this.wrapper.addEventListener("focus", (e) => this.onFocus.call(this, e), { capture: true });
+        this.wrapper.addEventListener("blur", (e) => this.onBlur.call(this, e), { capture: true });
 
         return this.wrapper
     }
@@ -372,10 +375,12 @@ export default class IndentTune implements BlockTune {
         const normalContentWidth = this.maxWidthForContent(givenWrapper);
 
         // until margin inline == 0;
-        const amountOfIndentToDouble = (blockWidth - normalContentWidth) / 2
+        const maxApplyableIndent = (blockWidth - normalContentWidth) / 2
 
-        const indentValuePixels = `${Math.min(amountOfIndentToDouble, indentValue) * 2}px`;
-        const indentValuePixelsForHighlight = `${Math.min(amountOfIndentToDouble, indentValue)}px`;
+        const indentToApply = Math.min(maxApplyableIndent, indentValue)
+        //have to double the value because content inside has margin inline;
+        const indentValuePixels = `${indentToApply * 2}px`;
+        const indentValuePixelsForHighlight = `${indentToApply}px`;
 
         if (this.isDirectionInverted) {
             givenWrapper.style.paddingLeft = '0px';
@@ -399,6 +404,20 @@ export default class IndentTune implements BlockTune {
         }
     }
 
+    private onFocus(e: FocusEvent) {
+        if (!(e.target instanceof HTMLElement)) return;
+        const isInsideCurrentBlock = this.wrapper.contains(e.target);
+        if (!isInsideCurrentBlock) return;
+        this.wrapper.setAttribute(this.DATA_FOCUSED, '');
+    }
+
+    private onBlur(e: FocusEvent) {
+        if (!(e.target instanceof HTMLElement)) return;
+        const isInsideCurrentBlock = this.wrapper.contains(e.target);
+        if (!isInsideCurrentBlock) return;
+        this.wrapper.removeAttribute(this.DATA_FOCUSED);
+    }
+
     private getGlobalSelectedBlocks() {
         const crossSelectedBlocks = new Array(this.api.blocks.getBlocksCount())
             .fill(0)
@@ -408,7 +427,7 @@ export default class IndentTune implements BlockTune {
     }
 
     private getWrapperBlockById(blockId: string) {
-        return document.querySelector(`.${this.EditorCSS.block}[data-id="${blockId}"] [${WRAPPER_NAME}]`)
+        return document.querySelector(`.${this.EditorCSS.block}[data-id="${blockId}"] [${IndentTune.WRAPPER_NAME}]`)
     }
 
     private getBlockForWrapper(wrapper: HTMLElement): HTMLElement | null {
@@ -476,7 +495,7 @@ export default class IndentTune implements BlockTune {
         //     }
 
         // }
-        console.warn("Cannot detect EditorJs max width for content. Please contact package author")
+        // console.warn("Cannot detect EditorJs max width for content. Please contact package author")
         this.cachedMaxWidthForContent = 650;
         return this.cachedMaxWidthForContent;
     }

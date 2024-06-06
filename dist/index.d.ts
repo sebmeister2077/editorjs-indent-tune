@@ -37,6 +37,8 @@ export type IndentData = {
 };
 export default class IndentTune implements BlockTune {
     static get isTune(): boolean;
+    static WRAPPER_NAME: string;
+    private DATA_FOCUSED;
     private DATA_INDENT_LEVEL;
     private api;
     private block;
@@ -67,6 +69,8 @@ export default class IndentTune implements BlockTune {
     private getTuneByName;
     private getTuneTitleByName;
     private applyStylesToWrapper;
+    private onFocus;
+    private onBlur;
     private getGlobalSelectedBlocks;
     private getWrapperBlockById;
     private getBlockForWrapper;
