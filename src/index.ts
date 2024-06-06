@@ -88,6 +88,8 @@ export default class IndentTune implements BlockTune {
 
         if (this.config.multiblock && !this.config.tuneName)
             console.error("IndentTune config 'tuneName' was not provided, this is required for multiblock option to work.")
+
+        window.addEventListener("resize", (e) => this.onResize.call(this, e));
     }
 
     // prepare?(): void | Promise<void> {
@@ -363,7 +365,7 @@ export default class IndentTune implements BlockTune {
         return this.getTuneByName(name)?.querySelector(`.${this.CSS.popoverItemTitle}`)
     }
 
-    private applyStylesToWrapper(givenWrapper: HTMLElement, indentLevel: number) {
+    private applyStylesToWrapper(givenWrapper: HTMLElement, indentLevel: number = parseInt(givenWrapper.getAttribute(this.DATA_INDENT_LEVEL) || "0")) {
         const indentValue = indentLevel * this.config.indentSize;
         givenWrapper.setAttribute(this.DATA_INDENT_LEVEL, indentLevel.toString());
 
@@ -416,6 +418,20 @@ export default class IndentTune implements BlockTune {
         const isInsideCurrentBlock = this.wrapper.contains(e.target);
         if (!isInsideCurrentBlock) return;
         this.wrapper.removeAttribute(this.DATA_FOCUSED);
+    }
+
+    private lastResizeTimeout: null | NodeJS.Timeout = null;
+    private onResize(e: UIEvent) {
+        const timeoutDelayMs = 500;
+        if (this.lastResizeTimeout)
+            clearTimeout(this.lastResizeTimeout)
+        this.lastResizeTimeout = setTimeout(() => {
+            const allWrappers = document.querySelectorAll(`[${IndentTune.WRAPPER_NAME}]`);
+            allWrappers.forEach((w) => {
+                if (!(w instanceof HTMLElement)) return;
+                this.applyStylesToWrapper(w);
+            });
+        }, timeoutDelayMs);
     }
 
     private getGlobalSelectedBlocks() {

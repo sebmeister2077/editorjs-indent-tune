@@ -71,6 +71,8 @@ export default class IndentTune implements BlockTune {
     private applyStylesToWrapper;
     private onFocus;
     private onBlur;
+    private lastResizeTimeout;
+    private onResize;
     private getGlobalSelectedBlocks;
     private getWrapperBlockById;
     private getBlockForWrapper;
