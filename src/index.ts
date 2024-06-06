@@ -349,34 +349,39 @@ export default class IndentTune implements BlockTune {
         return this.getTuneByName(name)?.querySelector(`.${this.CSS.popoverItemTitle}`)
     }
 
-    private applyStylesToWrapper(wrapper: HTMLElement, indentLevel: number) {
+    private applyStylesToWrapper(givenWrapper: HTMLElement, indentLevel: number) {
         const indentValue = indentLevel * this.config.indentSize;
-        const contentElement = wrapper.querySelector(`.${this.EditorCSS.content}`);
-        if (!(contentElement instanceof HTMLElement)) return;
+        givenWrapper.setAttribute(this.DATA_INDENT_LEVEL, indentLevel.toString());
 
-        const { marginInline } = window.getComputedStyle(contentElement)
-        const marginInlineValue = parseInt(marginInline);
-        const previousIndentLevel = parseInt(wrapper.getAttribute(this.DATA_INDENT_LEVEL) ?? "0");
+        const contentElement = givenWrapper.querySelector(`.${this.EditorCSS.content}`);
+        const blockElement = this.getBlockForWrapper(givenWrapper);
+        if (!(contentElement instanceof HTMLElement) || !blockElement) return;
 
-        const indentValuePixels = `${indentValue * 2}px`;
+        const blockWidth = blockElement.getBoundingClientRect().width;
+        const normalContentWidth = this.maxWidthForContent;
 
-        const highlightElement = wrapper.querySelector(`.${this.CSS.highlightIndent}`)
+        // until margin inline == 0;
+        const amountOfIndentToDouble = (blockWidth - normalContentWidth) / 2
+
+        const indentValuePixels = `${Math.min(amountOfIndentToDouble, indentValue) * 2}px`;
+        const indentValuePixelsForHighlight = `${Math.min(amountOfIndentToDouble, indentValue)}px`;
+
+        const highlightElement = givenWrapper.querySelector(`.${this.CSS.highlightIndent}`)
         if (this.isDirectionInverted) {
-            wrapper.style.paddingLeft = '0px';
-            wrapper.style.paddingRight = indentValuePixels;
+            givenWrapper.style.paddingLeft = '0px';
+            givenWrapper.style.paddingRight = indentValuePixels;
         } else {
-            wrapper.style.paddingLeft = indentValuePixels;
-            wrapper.style.paddingRight = "0px";
+            givenWrapper.style.paddingLeft = indentValuePixels;
+            givenWrapper.style.paddingRight = "0px";
         }
-        wrapper.setAttribute(this.DATA_INDENT_LEVEL, indentLevel.toString());
         if (!(highlightElement instanceof HTMLElement)) return;
         if (this.isDirectionInverted) {
-            highlightElement.style.width = indentValuePixels;
+            highlightElement.style.width = indentValuePixelsForHighlight;
             highlightElement.style.left = "100%";
             highlightElement.style.right = '';
         }
         else {
-            highlightElement.style.width = indentValuePixels;
+            highlightElement.style.width = indentValuePixelsForHighlight;
             highlightElement.style.left = "";
             highlightElement.style.right = '100%';
         }
@@ -392,6 +397,15 @@ export default class IndentTune implements BlockTune {
 
     private getWrapperBlockById(blockId: string) {
         return document.querySelector(`.${this.EditorCSS.block}[data-id="${blockId}"] [${WRAPPER_NAME}]`)
+    }
+
+    private getBlockForWrapper(wrapper: HTMLElement): HTMLElement | null {
+        let current = wrapper;
+        while ((!current.classList.contains(this.EditorCSS.block))) {
+            if (!current.parentElement || (current instanceof HTMLHtmlElement)) return null;
+            current = current.parentElement;
+        }
+        return current;
     }
 
     private alignmentChangeListener(blockId: string, direction: TextDirection) {

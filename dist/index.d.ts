@@ -64,6 +64,7 @@ export default class IndentTune implements BlockTune {
     private applyStylesToWrapper;
     private getGlobalSelectedBlocks;
     private getWrapperBlockById;
+    private getBlockForWrapper;
     private alignmentChangeListener;
     private createElementFromTemplate;
     private cachedMaxWidthForContent;
