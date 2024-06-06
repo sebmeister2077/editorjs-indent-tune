@@ -8,6 +8,9 @@ export type TextDirection = 'ltr' | "rtl"
 
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
+    /**
+     * apply a highlight to the indent if not null
+     */
     highlightIndent?: {
         className?: string,
         /**
@@ -17,6 +20,13 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
         tuneNames?: string[]
     };
     orientation: 'horizontal' | 'vertical';
+    /**
+     * Example:
+     * {
+     *    tableTuneName: { min: 2, max:8 },
+     *    imageTuneName: { min:1 }
+     * }
+     */
     customBlockIndentLimits: Record<string, Partial<Record<'min' | 'max', number>>>;
     /**
      * Custom keyboard indent handler.
@@ -24,6 +34,9 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
      * Return 'undefined' or pass 'false' instead of a function to disable the shortcut entirely
      */
     handleShortcut?: ((e: KeyboardEvent, blockId: string) => 'indent' | 'unindent' | "default" | undefined) | undefined | false;
+    /**
+     *  `ltr` | `rtl`
+     */
     direction: TextDirection;
     /**
      * Handle dynamic direction change (on each block level)
