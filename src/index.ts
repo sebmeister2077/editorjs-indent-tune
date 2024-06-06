@@ -46,7 +46,7 @@ export default class IndentTune implements BlockTune {
         return true
     }
     public static WRAPPER_NAME = 'data-block-indent-wrapper'
-    private DATA_FOCUSED = 'data-focused'
+    public static DATA_FOCUSED = 'data-focused'
     private DATA_INDENT_LEVEL = "data-indent-level"
     private api: API
     private block: BlockAPI | undefined
@@ -384,6 +384,10 @@ export default class IndentTune implements BlockTune {
         const indentValuePixels = `${indentToApply * 2}px`;
         const indentValuePixelsForHighlight = `${indentToApply}px`;
 
+        // because the direction has been changed
+        // const omitTransitionTemporarily = givenWrapper.style[this.isDirectionInverted ? 'paddingLeft' : "paddingRight"] === "0px"
+        // if (omitTransitionTemporarily) this.omitTransitionTemporarily(givenWrapper)
+
         if (this.isDirectionInverted) {
             givenWrapper.style.paddingLeft = '0px';
             givenWrapper.style.paddingRight = indentValuePixels;
@@ -394,6 +398,9 @@ export default class IndentTune implements BlockTune {
 
         const highlightElement = givenWrapper.querySelector(`.${this.CSS.highlightIndent}`)
         if (!(highlightElement instanceof HTMLElement)) return;
+
+        // if (omitTransitionTemporarily) this.omitTransitionTemporarily(highlightElement)
+
         if (this.isDirectionInverted) {
             highlightElement.style.width = indentValuePixelsForHighlight;
             highlightElement.style.left = "100%";
@@ -410,14 +417,14 @@ export default class IndentTune implements BlockTune {
         if (!(e.target instanceof HTMLElement)) return;
         const isInsideCurrentBlock = this.wrapper.contains(e.target);
         if (!isInsideCurrentBlock) return;
-        this.wrapper.setAttribute(this.DATA_FOCUSED, '');
+        this.wrapper.setAttribute(IndentTune.DATA_FOCUSED, '');
     }
 
     private onBlur(e: FocusEvent) {
         if (!(e.target instanceof HTMLElement)) return;
         const isInsideCurrentBlock = this.wrapper.contains(e.target);
         if (!isInsideCurrentBlock) return;
-        this.wrapper.removeAttribute(this.DATA_FOCUSED);
+        this.wrapper.removeAttribute(IndentTune.DATA_FOCUSED);
     }
 
     private lastResizeTimeout: null | NodeJS.Timeout = null;
@@ -478,6 +485,13 @@ export default class IndentTune implements BlockTune {
     private createElementFromTemplate(template: string): HTMLElement {
         return new DOMParser().parseFromString(template, 'text/html').body.firstChild as HTMLElement;
     }
+
+    // private omitTransitionTemporarily(element: HTMLElement) {
+    //     element.style.transitionDuration = "0s";
+    //      (() => {
+    //         element.style.transitionDuration = "";
+    //     })
+    // }
 
     private cachedMaxWidthForContent: number | null = null;
     private maxWidthForContent(elementInsideEditor: HTMLElement): number {
