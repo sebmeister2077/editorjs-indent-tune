@@ -6,6 +6,11 @@ export type IndentTuneConfig = Partial<IndentTuneConfigOptions>;
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
     highlightIndent?: {
         className?: string;
+        /**
+         * Tunes you want to apply highlight for.
+         * Defaults to all if null.
+         */
+        tuneNames?: string[];
     };
     orientation: 'horizontal' | 'vertical';
     customBlockIndentLimits: Record<string, Partial<Record<'min' | 'max', number>>>;
@@ -68,5 +73,5 @@ export default class IndentTune implements BlockTune {
     private alignmentChangeListener;
     private createElementFromTemplate;
     private cachedMaxWidthForContent;
-    private get maxWidthForContent();
+    private maxWidthForContent;
 }
