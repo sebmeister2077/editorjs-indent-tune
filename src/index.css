@@ -44,8 +44,6 @@
 }
 
 .ce-highlight-indent {
-    will-change: background-color;
-    transition: background-color .4s;
     display: inline-block;
     height: 1.6em;
     top: 50%;
@@ -55,12 +53,4 @@
     -moz-transform: translate(0px, -50%);
     -ms-transform: translate(0px, -50%);
     -o-transform: translate(0px, -50%);
-    -webkit-transition: background-color .4s;
-    -moz-transition: background-color .4s;
-    -ms-transition: background-color .4s;
-    -o-transition: background-color .4s;
-}
-
-:where([data-block-indent-wrapper][data-focused]) .ce-highlight-indent {
-    background-color: green;
 }
