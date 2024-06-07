@@ -3,13 +3,30 @@ import { type BlockToolConstructorOptions, type TunesMenuConfig } from '@editorj
 import { IconChevronLeft, IconChevronRight } from '@codexteam/icons'
 import './index.css'
 
-const WRAPPER_NAME = 'data-block-indent-wrapper'
 
 export type TextDirection = 'ltr' | "rtl"
 
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
+    /**
+     * apply a highlight to the indent if not null
+     */
+    highlightIndent?: {
+        className?: string,
+        /**
+         * Tunes you want to apply highlight for.
+         * Defaults to all.
+         */
+        tuneNames?: string[]
+    };
     orientation: 'horizontal' | 'vertical';
+    /**
+     * Example:
+     * {
+     *    tableTuneName: { min: 2, max:8 },
+     *    imageTuneName: { min:1 }
+     * }
+     */
     customBlockIndentLimits: Record<string, Partial<Record<'min' | 'max', number>>>;
     /**
      * Custom keyboard indent handler.
@@ -17,6 +34,9 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
      * Return 'undefined' or pass 'false' instead of a function to disable the shortcut entirely
      */
     handleShortcut?: ((e: KeyboardEvent, blockId: string) => 'indent' | 'unindent' | "default" | undefined) | undefined | false;
+    /**
+     *  `ltr` | `rtl`
+     */
     direction: TextDirection;
     /**
      * Handle dynamic direction change (on each block level)
@@ -38,7 +58,9 @@ export default class IndentTune implements BlockTune {
     public static get isTune() {
         return true
     }
-
+    public static DATA_WRAPPER_NAME = 'data-block-indent-wrapper'
+    public static DATA_FOCUSED = 'data-focused'
+    public static DATA_INDENT_LEVEL = "data-indent-level"
     private api: API
     private block: BlockAPI | undefined
     private config: IndentTuneConfigOptions
@@ -79,6 +101,8 @@ export default class IndentTune implements BlockTune {
 
         if (this.config.multiblock && !this.config.tuneName)
             console.error("IndentTune config 'tuneName' was not provided, this is required for multiblock option to work.")
+
+        window.addEventListener("resize", (e) => this.onResize.call(this, e));
     }
 
     // prepare?(): void | Promise<void> {
@@ -130,7 +154,7 @@ export default class IndentTune implements BlockTune {
 			</div>
 		`
 
-        const item = new DOMParser().parseFromString(html, 'text/html').body.firstChild as HTMLElement
+        const item = this.createElementFromTemplate(html);
 
         item.querySelector(`[data-${this.TuneNames.indentRight}]`)?.addEventListener('click', () => this.handleIndentRight())
         item.querySelector(`[data-${this.TuneNames.indentLeft}]`)?.addEventListener('click', () => this.handleIndentLeft())
@@ -140,11 +164,24 @@ export default class IndentTune implements BlockTune {
 
     public wrap(pluginsContent: HTMLElement): HTMLElement {
         this.wrapper.appendChild(pluginsContent)
-        this.wrapper.setAttribute(WRAPPER_NAME, '')
+        this.wrapper.setAttribute(IndentTune.DATA_WRAPPER_NAME, '')
+
+        const ignoreBlockHighlight = Boolean(!this.config.highlightIndent || this.block?.name && this.config.highlightIndent?.tuneNames?.includes(this.block.name));
+
+        if (!ignoreBlockHighlight) {
+            const highlightEl = this.createElementFromTemplate(/*html*/`
+                <div class="${this.config.highlightIndent?.className ?? ""} ${this.CSS.highlightIndent}">
+                </div>
+            `);
+            const contentEl = pluginsContent.classList.contains(this.EditorCSS.content) ? pluginsContent : pluginsContent.querySelector(`.${this.EditorCSS.content}`)
+            contentEl?.appendChild(highlightEl);
+        }
 
         this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
 
         this.wrapper.addEventListener('keydown', (...args) => this.onKeyDown.apply(this, args), { capture: true })
+        this.wrapper.addEventListener("focus", (e) => this.onFocus.call(this, e), { capture: true });
+        this.wrapper.addEventListener("blur", (e) => this.onBlur.call(this, e), { capture: true });
 
         return this.wrapper
     }
@@ -160,6 +197,14 @@ export default class IndentTune implements BlockTune {
             popoverItemIcon: 'ce-popover-item__icon',
             popoverItemTitle: 'ce-popover-item__title',
             disabledItem: 'ce-popover-item--disabled',
+            highlightIndent: "ce-highlight-indent",
+        }
+    }
+    private get EditorCSS() {
+        return {
+            block: "ce-block",
+            content: "ce-block__content",
+            redactor: "codex-editor__redactor",
         }
     }
 
@@ -333,15 +378,80 @@ export default class IndentTune implements BlockTune {
         return this.getTuneByName(name)?.querySelector(`.${this.CSS.popoverItemTitle}`)
     }
 
-    private applyStylesToWrapper(wrapper: HTMLElement, indentLevel: number) {
-        const indentValuePixels = `${indentLevel * this.config.indentSize}px`
+    private applyStylesToWrapper(givenWrapper: HTMLElement, indentLevel: number = parseInt(givenWrapper.getAttribute(IndentTune.DATA_INDENT_LEVEL) || "0")) {
+        const indentValue = indentLevel * this.config.indentSize;
+        givenWrapper.setAttribute(IndentTune.DATA_INDENT_LEVEL, indentLevel.toString());
+
+        const contentElement = givenWrapper.querySelector(`.${this.EditorCSS.content}`);
+        const blockElement = this.getBlockForWrapper(givenWrapper) || document.querySelector(`.${this.EditorCSS.redactor}`);
+        if (!(contentElement instanceof HTMLElement) || !blockElement) return;
+
+        const blockWidth = blockElement.getBoundingClientRect().width;
+        const normalContentWidth = this.maxWidthForContent(givenWrapper);
+
+        // until margin inline == 0;
+        const maxApplyableIndent = (blockWidth - normalContentWidth) / 2
+
+        const indentToApply = Math.min(maxApplyableIndent, indentValue)
+        //have to double the value because content inside has margin inline;
+        const indentValuePixels = `${indentToApply * 2}px`;
+        const indentValuePixelsForHighlight = `${indentToApply}px`;
+
+        // because the direction has been changed
+        // const omitTransitionTemporarily = givenWrapper.style[this.isDirectionInverted ? 'paddingLeft' : "paddingRight"] === "0px"
+        // if (omitTransitionTemporarily) this.omitTransitionTemporarily(givenWrapper)
+
         if (this.isDirectionInverted) {
-            wrapper.style.paddingLeft = '0px';
-            wrapper.style.paddingRight = indentValuePixels;
+            givenWrapper.style.paddingLeft = '0px';
+            givenWrapper.style.paddingRight = indentValuePixels;
         } else {
-            wrapper.style.paddingLeft = indentValuePixels;
-            wrapper.style.paddingRight = "0px";
+            givenWrapper.style.paddingLeft = indentValuePixels;
+            givenWrapper.style.paddingRight = "0px";
         }
+
+        const highlightElement = givenWrapper.querySelector(`.${this.CSS.highlightIndent}`)
+        if (!(highlightElement instanceof HTMLElement)) return;
+
+        // if (omitTransitionTemporarily) this.omitTransitionTemporarily(highlightElement)
+
+        if (this.isDirectionInverted) {
+            highlightElement.style.width = indentValuePixelsForHighlight;
+            highlightElement.style.left = "100%";
+            highlightElement.style.right = '';
+        }
+        else {
+            highlightElement.style.width = indentValuePixelsForHighlight;
+            highlightElement.style.left = "";
+            highlightElement.style.right = '100%';
+        }
+    }
+
+    private onFocus(e: FocusEvent) {
+        if (!(e.target instanceof HTMLElement)) return;
+        const isInsideCurrentBlock = this.wrapper.contains(e.target);
+        if (!isInsideCurrentBlock) return;
+        this.wrapper.setAttribute(IndentTune.DATA_FOCUSED, '');
+    }
+
+    private onBlur(e: FocusEvent) {
+        if (!(e.target instanceof HTMLElement)) return;
+        const isInsideCurrentBlock = this.wrapper.contains(e.target);
+        if (!isInsideCurrentBlock) return;
+        this.wrapper.removeAttribute(IndentTune.DATA_FOCUSED);
+    }
+
+    private lastResizeTimeout: null | NodeJS.Timeout = null;
+    private onResize(e: UIEvent) {
+        const timeoutDelayMs = 500;
+        if (this.lastResizeTimeout)
+            clearTimeout(this.lastResizeTimeout)
+        this.lastResizeTimeout = setTimeout(() => {
+            const allWrappers = document.querySelectorAll(`[${IndentTune.DATA_WRAPPER_NAME}]`);
+            allWrappers.forEach((w) => {
+                if (!(w instanceof HTMLElement)) return;
+                this.applyStylesToWrapper(w);
+            });
+        }, timeoutDelayMs);
     }
 
     private getGlobalSelectedBlocks() {
@@ -353,7 +463,17 @@ export default class IndentTune implements BlockTune {
     }
 
     private getWrapperBlockById(blockId: string) {
-        return document.querySelector(`.ce-block[data-id="${blockId}"] [${WRAPPER_NAME}]`)
+        return document.querySelector(`.${this.EditorCSS.block}[data-id="${blockId}"] [${IndentTune.DATA_WRAPPER_NAME}]`)
+    }
+
+    private getBlockForWrapper(wrapper: HTMLElement): HTMLElement | null {
+        let current = wrapper;
+        while ((!current.classList.contains(this.EditorCSS.block))) {
+            if (!current.parentElement || (current instanceof HTMLHtmlElement)) return null;
+            current = current.parentElement;
+        }
+
+        return current
     }
 
     private alignmentChangeListener(blockId: string, direction: TextDirection) {
@@ -373,5 +493,53 @@ export default class IndentTune implements BlockTune {
             const indentLeftBtnTitle = this.getTuneTitleByName(`${this.TuneNames.indentLeft}-${this.block?.id}`);
             if (indentLeftBtnTitle) indentLeftBtnTitle.textContent = this.leftText
         }
+    }
+
+    private createElementFromTemplate(template: string): HTMLElement {
+        return new DOMParser().parseFromString(template, 'text/html').body.firstChild as HTMLElement;
+    }
+
+    // private omitTransitionTemporarily(element: HTMLElement) {
+    //     element.style.transitionDuration = "0s";
+    //      (() => {
+    //         element.style.transitionDuration = "";
+    //     })
+    // }
+
+    private cachedMaxWidthForContent: number | null = null;
+    private maxWidthForContent(elementInsideEditor: HTMLElement): number {
+        const content = elementInsideEditor.querySelector(`.${this.EditorCSS.content}`);
+        if ((content instanceof HTMLElement)) {
+            const { maxWidth } = window.getComputedStyle(content);
+            if (maxWidth) {
+                this.cachedMaxWidthForContent = parseInt(maxWidth);
+                return this.cachedMaxWidthForContent
+            }
+        }
+
+        if (this.cachedMaxWidthForContent !== null) return this.cachedMaxWidthForContent
+        // Get value from stylesheet
+        // for (let i = 0; i < document.styleSheets.length; i++) {
+        //     const styleSheet = document.styleSheets.item(i);
+        //     if (!styleSheet || !(styleSheet.ownerNode instanceof HTMLStyleElement) || styleSheet.ownerNode.id !== "editor-js-styles") continue;
+
+        //     for (let j = 0; j < styleSheet.cssRules.length; j++) {
+        //         const rule = styleSheet.cssRules.item(j);
+        //         if (!rule) continue;
+        //         const selector = `.${this.EditorCSS.content}`
+        //         if (!rule.cssText.startsWith(selector + " {") && (rule as { selectorText?: string }).selectorText !== selector)
+        //             continue;
+        //         const matches = /max-width: [\d]+px;/.exec(rule.cssText)
+        //         if (!matches || !matches.length) continue;
+
+        //         const maxWidth = parseInt(matches[0].replace("max-width:", ''));
+        //         this.cachedMaxWidthForContent = maxWidth;
+        //         return this.maxWidthForContent;
+        //     }
+
+        // }
+        // console.warn("Cannot detect EditorJs max width for content. Please contact package author")
+        this.cachedMaxWidthForContent = 650;
+        return this.cachedMaxWidthForContent;
     }
 }

@@ -4,7 +4,25 @@ import './index.css';
 export type TextDirection = 'ltr' | "rtl";
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>;
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
+    /**
+     * apply a highlight to the indent if not null
+     */
+    highlightIndent?: {
+        className?: string;
+        /**
+         * Tunes you want to apply highlight for.
+         * Defaults to all.
+         */
+        tuneNames?: string[];
+    };
     orientation: 'horizontal' | 'vertical';
+    /**
+     * Example:
+     * {
+     *    tableTuneName: { min: 2, max:8 },
+     *    imageTuneName: { min:1 }
+     * }
+     */
     customBlockIndentLimits: Record<string, Partial<Record<'min' | 'max', number>>>;
     /**
      * Custom keyboard indent handler.
@@ -12,6 +30,9 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
      * Return 'undefined' or pass 'false' instead of a function to disable the shortcut entirely
      */
     handleShortcut?: ((e: KeyboardEvent, blockId: string) => 'indent' | 'unindent' | "default" | undefined) | undefined | false;
+    /**
+     *  `ltr` | `rtl`
+     */
     direction: TextDirection;
     /**
      * Handle dynamic direction change (on each block level)
@@ -29,6 +50,9 @@ export type IndentData = {
 };
 export default class IndentTune implements BlockTune {
     static get isTune(): boolean;
+    static DATA_WRAPPER_NAME: string;
+    static DATA_FOCUSED: string;
+    static DATA_INDENT_LEVEL: string;
     private api;
     private block;
     private config;
@@ -40,6 +64,7 @@ export default class IndentTune implements BlockTune {
     wrap(pluginsContent: HTMLElement): HTMLElement;
     save(): IndentData;
     private get CSS();
+    private get EditorCSS();
     private get TuneNames();
     private get customInterval();
     private get maxIndent();
@@ -57,7 +82,15 @@ export default class IndentTune implements BlockTune {
     private getTuneByName;
     private getTuneTitleByName;
     private applyStylesToWrapper;
+    private onFocus;
+    private onBlur;
+    private lastResizeTimeout;
+    private onResize;
     private getGlobalSelectedBlocks;
     private getWrapperBlockById;
+    private getBlockForWrapper;
     private alignmentChangeListener;
+    private createElementFromTemplate;
+    private cachedMaxWidthForContent;
+    private maxWidthForContent;
 }

@@ -46,20 +46,6 @@ const editor = new EditorJS({
 })
 ```
 
-Optionally, you can connect this Tune only for specified blocks:
-
-```js
-const editor = new EditorJS({
-    tools: {
-        indentTune: IndentTune,
-        paragraph: {
-            // apply only for the 'paragraph' tool
-            tunes: ['indentTune'],
-        },
-    },
-})
-```
-
 You can disable this tune for a specific block by not adding it in the tunes array
 
 ```js
@@ -70,6 +56,32 @@ const editor = new EditorJS({
             tunes: [
                 /* all other tunes except those you dont want*/
             ],
+        },
+    },
+})
+```
+
+Apply a indent highlight
+
+```css
+.indentHighlight {
+    transition: background-color 0.4s;
+}
+[data-block-indent-wrapper][data-focused] .indentHighlight {
+    background-color: red;
+}
+```
+
+```js
+const editor = new EditorJS({
+    tools: {
+        indentTune: {
+            class: IndentTune,
+            config: {
+                highlightIndent: {
+                    className: 'indentHighlight',
+                },
+            },
         },
     },
 })
@@ -152,17 +164,26 @@ const editor = new EditorJS({
 
 You're free to use whatever implementation you wish.
 
+### Select elements
+
+Selection of the **IndentTuneWrapper** can be done (in JS) using `[${IndentTune.DATA_WRAPPER_NAME}]` selector
+
+Selection of the **Focused** state for the **IndentTuneWrapper** can be achieved (in JS) using `[${IndentTune.DATA_FOCUSED}]` selector
+
+Selection of the **IndentLevel** can be accesed from the `IndentTune.DATA_INDENT_LEVEL` attribute
+
 ## Config Params (optional)
 
-| Field                   | Type                                                                                              | Description                                                                                             | Default      |
-| ----------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------ |
-| indentSize              | `number`                                                                                          | Size of one indent level (in pixels)                                                                    | `24`         |
-| maxIndent               | `number`                                                                                          | The upper indent limit of any block                                                                     | `8`          |
-| minIndent               | `number`                                                                                          | The lower indent limit of any block                                                                     | `0`          |
-| orientation             | `'horizontal' \| 'vertical'`                                                                      | The UI design for how you want the toolbox to be displayed                                              | `horizontal` |
-| customBlockIndentLimits | `Record<string, Partial<Record<'min' \| 'max', number>>>`                                         | A set of overrides of the indent limit for each type of block                                           | `{}`         |
-| multiblock              | `boolean`                                                                                         | Marks if you can indent multiple blocks at a time                                                       | `false`      |
-| tuneName                | `string \| null`                                                                                  | This is required for multiblock to work                                                                 | `null`       |
-| handleShortcut          | `((e:KeyboardEvent, blockId:string) => 'unindent' \| 'indent' \| 'default' \| void) \| undefined` | Custom shortcut function that allows overriding the default indenting using keyboard                    | `undefined`  |
-| direction               | `'ltr' \| 'rtl' `                                                                                 | Specify the global direction of the indents                                                             | `ltr`        |
-| directionChangeHandler  | `null \| (listener: (blockId: string, direction: TextDirection) => void): void`                   | If provided will be used to apply visual changes (indent direction) based on the provided change value. | `null`       |
+| Field                   | Type                                                                                                       | Description                                                                                                                                                                                                          | Default      |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| indentSize              | `number`                                                                                                   | Size of one indent level (in pixels)                                                                                                                                                                                 | `24`         |
+| maxIndent               | `number`                                                                                                   | The upper indent limit of any block                                                                                                                                                                                  | `8`          |
+| minIndent               | `number`                                                                                                   | The lower indent limit of any block                                                                                                                                                                                  | `0`          |
+| orientation             | `'horizontal' \| 'vertical'`                                                                               | The UI design for how you want the toolbox to be displayed                                                                                                                                                           | `horizontal` |
+| customBlockIndentLimits | `Record<string, Partial<Record<'min' \| 'max', number>>>`                                                  | A set of overrides of the indent limit for each type of block                                                                                                                                                        | `{}`         |
+| multiblock              | `boolean`                                                                                                  | Marks if you can indent multiple blocks at a time                                                                                                                                                                    | `false`      |
+| tuneName                | `string \| null`                                                                                           | This is required for multiblock to work                                                                                                                                                                              | `null`       |
+| handleShortcut          | `((e:KeyboardEvent, blockId:string) => 'unindent' \| 'indent' \| 'default' \| void) \| undefined \| false` | Custom shortcut function that allows overriding the default indenting using keyboard. If set as `false` no shortcut will be applied.                                                                                 | `undefined`  |
+| direction               | `'ltr' \| 'rtl' `                                                                                          | Specify the global direction of the indents                                                                                                                                                                          | `ltr`        |
+| directionChangeHandler  | `null \| (listener: (blockId: string, direction: TextDirection) => void): void`                            | If provided will be used to apply visual changes (indent direction) based on the provided change value.                                                                                                              | `null`       |
+| highlightIndent         | `null \| { className?: string; tuneNames?: string[]; }`                                                    | If provided will display a highlight for the indent. Provide a list of `tuneNames` for which it should be applied, applies to all by default. Can be customized with custom class using `[data-focused] .myClass {}` | `null`       |
