@@ -50,9 +50,9 @@ export type IndentData = {
 };
 export default class IndentTune implements BlockTune {
     static get isTune(): boolean;
-    static WRAPPER_NAME: string;
+    static DATA_WRAPPER_NAME: string;
     static DATA_FOCUSED: string;
-    private DATA_INDENT_LEVEL;
+    static DATA_INDENT_LEVEL: string;
     private api;
     private block;
     private config;

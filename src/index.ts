@@ -58,9 +58,9 @@ export default class IndentTune implements BlockTune {
     public static get isTune() {
         return true
     }
-    public static WRAPPER_NAME = 'data-block-indent-wrapper'
+    public static DATA_WRAPPER_NAME = 'data-block-indent-wrapper'
     public static DATA_FOCUSED = 'data-focused'
-    private DATA_INDENT_LEVEL = "data-indent-level"
+    public static DATA_INDENT_LEVEL = "data-indent-level"
     private api: API
     private block: BlockAPI | undefined
     private config: IndentTuneConfigOptions
@@ -164,7 +164,7 @@ export default class IndentTune implements BlockTune {
 
     public wrap(pluginsContent: HTMLElement): HTMLElement {
         this.wrapper.appendChild(pluginsContent)
-        this.wrapper.setAttribute(IndentTune.WRAPPER_NAME, '')
+        this.wrapper.setAttribute(IndentTune.DATA_WRAPPER_NAME, '')
 
         const ignoreBlockHighlight = Boolean(!this.config.highlightIndent || this.block?.name && this.config.highlightIndent?.tuneNames?.includes(this.block.name));
 
@@ -378,9 +378,9 @@ export default class IndentTune implements BlockTune {
         return this.getTuneByName(name)?.querySelector(`.${this.CSS.popoverItemTitle}`)
     }
 
-    private applyStylesToWrapper(givenWrapper: HTMLElement, indentLevel: number = parseInt(givenWrapper.getAttribute(this.DATA_INDENT_LEVEL) || "0")) {
+    private applyStylesToWrapper(givenWrapper: HTMLElement, indentLevel: number = parseInt(givenWrapper.getAttribute(IndentTune.DATA_INDENT_LEVEL) || "0")) {
         const indentValue = indentLevel * this.config.indentSize;
-        givenWrapper.setAttribute(this.DATA_INDENT_LEVEL, indentLevel.toString());
+        givenWrapper.setAttribute(IndentTune.DATA_INDENT_LEVEL, indentLevel.toString());
 
         const contentElement = givenWrapper.querySelector(`.${this.EditorCSS.content}`);
         const blockElement = this.getBlockForWrapper(givenWrapper) || document.querySelector(`.${this.EditorCSS.redactor}`);
@@ -446,7 +446,7 @@ export default class IndentTune implements BlockTune {
         if (this.lastResizeTimeout)
             clearTimeout(this.lastResizeTimeout)
         this.lastResizeTimeout = setTimeout(() => {
-            const allWrappers = document.querySelectorAll(`[${IndentTune.WRAPPER_NAME}]`);
+            const allWrappers = document.querySelectorAll(`[${IndentTune.DATA_WRAPPER_NAME}]`);
             allWrappers.forEach((w) => {
                 if (!(w instanceof HTMLElement)) return;
                 this.applyStylesToWrapper(w);
@@ -463,7 +463,7 @@ export default class IndentTune implements BlockTune {
     }
 
     private getWrapperBlockById(blockId: string) {
-        return document.querySelector(`.${this.EditorCSS.block}[data-id="${blockId}"] [${IndentTune.WRAPPER_NAME}]`)
+        return document.querySelector(`.${this.EditorCSS.block}[data-id="${blockId}"] [${IndentTune.DATA_WRAPPER_NAME}]`)
     }
 
     private getBlockForWrapper(wrapper: HTMLElement): HTMLElement | null {

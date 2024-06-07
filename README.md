@@ -46,20 +46,6 @@ const editor = new EditorJS({
 })
 ```
 
-Optionally, you can connect this Tune only for specified blocks:
-
-```js
-const editor = new EditorJS({
-    tools: {
-        indentTune: IndentTune,
-        paragraph: {
-            // apply only for the 'paragraph' tool
-            tunes: ['indentTune'],
-        },
-    },
-})
-```
-
 You can disable this tune for a specific block by not adding it in the tunes array
 
 ```js
@@ -70,6 +56,32 @@ const editor = new EditorJS({
             tunes: [
                 /* all other tunes except those you dont want*/
             ],
+        },
+    },
+})
+```
+
+Apply a indent highlight
+
+```css
+.indentHighlight {
+    transition: background-color 0.4s;
+}
+[data-block-indent-wrapper][data-focused] .indentHighlight {
+    background-color: red;
+}
+```
+
+```js
+const editor = new EditorJS({
+    tools: {
+        indentTune: {
+            class: IndentTune,
+            config: {
+                highlightIndent: {
+                    className: 'indentHighlight',
+                },
+            },
         },
     },
 })
@@ -151,6 +163,14 @@ const editor = new EditorJS({
 ```
 
 You're free to use whatever implementation you wish.
+
+### Select elements
+
+Selection of the **IndentTuneWrapper** can be done (in JS) using `[${IndentTune.DATA_WRAPPER_NAME}]` selector
+
+Selection of the **Focused** state for the **IndentTuneWrapper** can be achieved (in JS) using `[${IndentTune.DATA_FOCUSED}]` selector
+
+Selection of the **IndentLevel** can be accesed from the `IndentTune.DATA_INDENT_LEVEL` attribute
 
 ## Config Params (optional)
 
