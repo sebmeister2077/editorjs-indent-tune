@@ -9,6 +9,10 @@ export type TextDirection = 'ltr' | "rtl"
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
     /**
+     * Handle auto indentation
+     */
+    autoIndent?: boolean
+    /**
      * apply a highlight to the indent if not null
      */
     highlightIndent?: {
@@ -76,6 +80,7 @@ export default class IndentTune implements BlockTune {
             maxIndent: 8,
             minIndent: 0,
             multiblock: false,
+            autoIndent: false,
             tuneName: null,
             orientation: 'horizontal',
             customBlockIndentLimits: {},
@@ -102,13 +107,69 @@ export default class IndentTune implements BlockTune {
         if (this.config.multiblock && !this.config.tuneName)
             console.error("IndentTune config 'tuneName' was not provided, this is required for multiblock option to work.")
 
-        window.addEventListener("resize", (e) => this.onResize.call(this, e));
+        window.addEventListener('resize', (e) => this.onResize.call(this, e))
+
+        if (this.config.autoIndent) {
+            this.handleAutoIndent()
+        }
     }
 
     // prepare?(): void | Promise<void> {
     // }
     // reset?(): void | Promise<void> {
     // }
+
+    private handleAutoIndent() {
+        // Initialise MutationObserver
+        const observer = new MutationObserver((mutationsList) => {
+            for (const mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    this.autoIndentAddedBlocks(mutation, observer)
+                }
+            }
+        })
+
+        // Start observing
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+        })
+    }
+
+    private autoIndentAddedBlocks(mutation: MutationRecord, observer: MutationObserver) {
+        for (let i = 0; i < mutation.addedNodes.length; i++) {
+            const node = mutation.addedNodes[i]
+            if (node instanceof Element && node.classList.contains('ce-block') && node.getAttribute('data-id') === this.block?.id) {
+                observer.disconnect()
+
+                // Find the previous block
+                const previousBlockElement = node.previousElementSibling
+                if (!previousBlockElement) {
+                    continue
+                }
+
+                // Get indent level and convert to Number
+                const indentLevel = Number(previousBlockElement.querySelector('div')?.getAttribute('data-indent-level'))
+
+                // Save indent level to data
+                this.data.indentLevel = indentLevel
+
+                const newBlock = node as HTMLElement
+                // Apply the indent level to the new block
+                this.applyIndentationToBlock(newBlock, this.data.indentLevel)
+
+                break
+            }
+        }
+    }
+
+    private applyIndentationToBlock(blockContent: HTMLElement, indentLevel: number) {
+        // Locate the `data-block-indent-wrapper` within block
+        const wrapper = blockContent?.querySelector(`[${IndentTune.DATA_WRAPPER_NAME}]`) as HTMLElement | null
+        if (wrapper) {
+            this.applyStylesToWrapper(wrapper, indentLevel)
+        }
+    }
 
     public render(): HTMLElement | TunesMenuConfig {
         //Disable items after they are rendered synchronously
