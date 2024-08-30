@@ -9,9 +9,16 @@ export type TextDirection = 'ltr' | "rtl"
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
     /**
-     * Handle auto indentation
+     * enable auto indent if not null or false
      */
-    autoIndent?: boolean
+    autoIndent?: {
+        enabled?: boolean
+        /**
+         * Tunes you want to apply auto indent for.
+         * Defaults to all.
+         */
+        tuneNames?: string[]
+    }
     /**
      * apply a highlight to the indent if not null
      */
@@ -80,7 +87,7 @@ export default class IndentTune implements BlockTune {
             maxIndent: 8,
             minIndent: 0,
             multiblock: false,
-            autoIndent: false,
+            autoIndent: { enabled: false, tuneNames: [] },
             tuneName: null,
             orientation: 'horizontal',
             customBlockIndentLimits: {},
@@ -109,8 +116,8 @@ export default class IndentTune implements BlockTune {
 
         window.addEventListener('resize', (e) => this.onResize.call(this, e))
 
-        if (this.config.autoIndent) {
-            this.handleAutoIndent()
+        if (this.shouldApplyAutoIndent(this.config.autoIndent)) {
+            queueMicrotask(() => this.autoIndentBlock())
         }
     }
 
@@ -119,56 +126,9 @@ export default class IndentTune implements BlockTune {
     // reset?(): void | Promise<void> {
     // }
 
-    private handleAutoIndent() {
-        // Initialise MutationObserver
-        const observer = new MutationObserver((mutationsList) => {
-            for (const mutation of mutationsList) {
-                if (mutation.type === 'childList') {
-                    this.autoIndentAddedBlocks(mutation, observer)
-                }
-            }
-        })
-
-        // Start observing
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-        })
-    }
-
-    private autoIndentAddedBlocks(mutation: MutationRecord, observer: MutationObserver) {
-        for (let i = 0; i < mutation.addedNodes.length; i++) {
-            const node = mutation.addedNodes[i]
-            if (node instanceof Element && node.classList.contains('ce-block') && node.getAttribute('data-id') === this.block?.id) {
-                observer.disconnect()
-
-                // Find the previous block
-                const previousBlockElement = node.previousElementSibling
-                if (!previousBlockElement) {
-                    continue
-                }
-
-                // Get indent level and convert to Number
-                const indentLevel = Number(previousBlockElement.querySelector('div')?.getAttribute('data-indent-level'))
-
-                // Save indent level to data
-                this.data.indentLevel = indentLevel
-
-                const newBlock = node as HTMLElement
-                // Apply the indent level to the new block
-                this.applyIndentationToBlock(newBlock, this.data.indentLevel)
-
-                break
-            }
-        }
-    }
-
-    private applyIndentationToBlock(blockContent: HTMLElement, indentLevel: number) {
-        // Locate the `data-block-indent-wrapper` within block
-        const wrapper = blockContent?.querySelector(`[${IndentTune.DATA_WRAPPER_NAME}]`) as HTMLElement | null
-        if (wrapper) {
-            this.applyStylesToWrapper(wrapper, indentLevel)
-        }
+    private shouldApplyAutoIndent(autoIndentConfig: IndentTuneConfigOptions['autoIndent']): boolean {
+        if (!autoIndentConfig?.enabled) return false
+        return !autoIndentConfig.tuneNames?.length || autoIndentConfig.tuneNames.includes(this.block?.name ?? '')
     }
 
     public render(): HTMLElement | TunesMenuConfig {
@@ -407,6 +367,23 @@ export default class IndentTune implements BlockTune {
         this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
 
         this.toggleDisableStateForButtons()
+    }
+
+    private autoIndentBlock() {
+        const currentBlockIndex = this.api.blocks.getBlockIndex(this.block!.id)
+        const previousBlock = this.api.blocks.getBlockByIndex(currentBlockIndex - 1)
+
+        if (!previousBlock) {
+            return
+        }
+
+        const previousBlockIndentLevel = Number(
+            previousBlock.holder?.querySelector(`[${IndentTune.DATA_WRAPPER_NAME}]`)?.getAttribute(IndentTune.DATA_INDENT_LEVEL),
+        )
+
+        this.data.indentLevel = previousBlockIndentLevel
+
+        this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
     }
 
     private toggleDisableStateForButtons() {
