@@ -387,12 +387,17 @@ export default class IndentTune implements BlockTune {
         if (!(contentElement instanceof HTMLElement) || !blockElement) return;
 
         const blockWidth = blockElement.getBoundingClientRect().width;
+        if (blockWidth === 0) //block is not in DOM yet/redactor is hidden, depends on editorjs version
+        {
+            queueMicrotask(() => this.applyStylesToWrapper.bind(this)(givenWrapper, indentLevel))
+            return
+        }
         const normalContentWidth = this.maxWidthForContent(givenWrapper);
 
         // until margin inline == 0;
         const maxApplyableIndent = (blockWidth - normalContentWidth) / 2
 
-        const indentToApply = Math.min(maxApplyableIndent, indentValue)
+        const indentToApply = Math.max(0, Math.min(maxApplyableIndent, indentValue));
         //have to double the value because content inside has margin inline;
         const indentValuePixels = `${indentToApply * 2}px`;
         const indentValuePixelsForHighlight = `${indentToApply}px`;
