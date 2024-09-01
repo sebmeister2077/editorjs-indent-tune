@@ -397,7 +397,7 @@ export default class IndentTune implements BlockTune {
         // until margin inline == 0;
         const maxApplyableIndent = (blockWidth - normalContentWidth) / 2
 
-        const indentToApply = Math.min(maxApplyableIndent, indentValue)
+        const indentToApply = Math.max(0, Math.min(maxApplyableIndent, indentValue));
         //have to double the value because content inside has margin inline;
         const indentValuePixels = `${indentToApply * 2}px`;
         const indentValuePixelsForHighlight = `${indentToApply}px`;
