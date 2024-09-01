@@ -387,7 +387,7 @@ export default class IndentTune implements BlockTune {
         if (!(contentElement instanceof HTMLElement) || !blockElement) return;
 
         const blockWidth = blockElement.getBoundingClientRect().width;
-        if (blockWidth === 0) // block is not in the DOM yet...depends on editor version
+        if (blockWidth === 0) //block is not in DOM yet/redactor is hidden, depends on editorjs version
         {
             queueMicrotask(() => this.applyStylesToWrapper.bind(this)(givenWrapper, indentLevel))
             return
