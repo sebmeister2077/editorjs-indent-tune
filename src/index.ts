@@ -9,18 +9,18 @@ export type TextDirection = 'ltr' | "rtl"
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
     /**
-     * enable auto indent if not null or false
+     * Enables auto indent if not null or `true`
+     * Default disabled.
      */
     autoIndent?: {
-        enabled?: boolean
         /**
          * Tunes you want to apply auto indent for.
          * Defaults to all.
          */
         tuneNames?: string[]
-    }
+    } | boolean;
     /**
-     * apply a highlight to the indent if not null
+     * Apply a highlight to the indent if not null
      */
     highlightIndent?: {
         className?: string,
@@ -43,6 +43,7 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
      * Custom keyboard indent handler.
      * Return 'indent' or 'unindent' if you want to change the current indentation.
      * Return 'undefined' or pass 'false' instead of a function to disable the shortcut entirely
+     * Return 'default' for default handling
      */
     handleShortcut?: ((e: KeyboardEvent, blockId: string) => 'indent' | 'unindent' | "default" | undefined) | undefined | false;
     /**
@@ -87,7 +88,7 @@ export default class IndentTune implements BlockTune {
             maxIndent: 8,
             minIndent: 0,
             multiblock: false,
-            autoIndent: { enabled: false, tuneNames: [] },
+            autoIndent: false,
             tuneName: null,
             orientation: 'horizontal',
             customBlockIndentLimits: {},
@@ -116,20 +117,18 @@ export default class IndentTune implements BlockTune {
 
         window.addEventListener('resize', (e) => this.onResize.call(this, e))
 
-        if (this.shouldApplyAutoIndent(this.config.autoIndent)) {
+        if (this.shouldApplyAutoIndent) {
             queueMicrotask(() => this.autoIndentBlock())
         }
     }
 
-    // prepare?(): void | Promise<void> {
-    // }
-    // reset?(): void | Promise<void> {
-    // }
+    public prepare?(): void | Promise<void> {
 
-    private shouldApplyAutoIndent(autoIndentConfig: IndentTuneConfigOptions['autoIndent']): boolean {
-        if (!autoIndentConfig?.enabled) return false
-        return !autoIndentConfig.tuneNames?.length || autoIndentConfig.tuneNames.includes(this.block?.name ?? '')
     }
+    public reset?(): void | Promise<void> {
+
+    }
+
 
     public render(): HTMLElement | TunesMenuConfig {
         //Disable items after they are rendered synchronously
@@ -260,6 +259,13 @@ export default class IndentTune implements BlockTune {
         return this.api.i18n.t(this.isDirectionInverted ? 'Indent' : 'Un Indent')
     }
 
+    private get shouldApplyAutoIndent(): boolean {
+        if (!this.config.autoIndent) return false
+        if (typeof this.config.autoIndent === 'boolean') return this.config.autoIndent;
+
+        return !this.config.autoIndent.tuneNames?.length || this.config.autoIndent.tuneNames.includes(this.block?.name ?? '')
+    }
+
     private onKeyDown(e: KeyboardEvent) {
         if (!this.block?.id) return;
         // omit key shortcut entirely
@@ -373,15 +379,18 @@ export default class IndentTune implements BlockTune {
         const currentBlockIndex = this.api.blocks.getBlockIndex(this.block!.id)
         const previousBlock = this.api.blocks.getBlockByIndex(currentBlockIndex - 1)
 
-        if (!previousBlock) {
-            return
-        }
+        if (!previousBlock) return
+
+        const previousBlockIndentLevelAttribute = previousBlock.holder?.querySelector(`[${IndentTune.DATA_WRAPPER_NAME}]`)
+            ?.getAttribute(IndentTune.DATA_INDENT_LEVEL);
 
         const previousBlockIndentLevel = Number(
-            previousBlock.holder?.querySelector(`[${IndentTune.DATA_WRAPPER_NAME}]`)?.getAttribute(IndentTune.DATA_INDENT_LEVEL),
+            previousBlockIndentLevelAttribute ?? 0,
         )
 
-        this.data.indentLevel = previousBlockIndentLevel
+        const currentBlockIndentLevel = Math.min(Math.max(previousBlockIndentLevel, this.minIndent), this.maxIndent)
+
+        this.data.indentLevel = currentBlockIndentLevel
 
         this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
     }

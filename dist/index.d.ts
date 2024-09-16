@@ -5,7 +5,18 @@ export type TextDirection = 'ltr' | "rtl";
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>;
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
     /**
-     * apply a highlight to the indent if not null
+     * Enables auto indent if not null or `true`
+     * Default disabled.
+     */
+    autoIndent?: {
+        /**
+         * Tunes you want to apply auto indent for.
+         * Defaults to all.
+         */
+        tuneNames?: string[];
+    } | boolean;
+    /**
+     * Apply a highlight to the indent if not null
      */
     highlightIndent?: {
         className?: string;
@@ -28,6 +39,7 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
      * Custom keyboard indent handler.
      * Return 'indent' or 'unindent' if you want to change the current indentation.
      * Return 'undefined' or pass 'false' instead of a function to disable the shortcut entirely
+     * Return 'default' for default handling
      */
     handleShortcut?: ((e: KeyboardEvent, blockId: string) => 'indent' | 'unindent' | "default" | undefined) | undefined | false;
     /**
@@ -60,6 +72,8 @@ export default class IndentTune implements BlockTune {
     private wrapper;
     private DEFAULT_INDENT_KEY;
     constructor({ api, data, config, block }: BlockToolConstructorOptions<IndentData, IndentTuneConfigOptions>);
+    prepare?(): void | Promise<void>;
+    reset?(): void | Promise<void>;
     render(): HTMLElement | TunesMenuConfig;
     wrap(pluginsContent: HTMLElement): HTMLElement;
     save(): IndentData;
@@ -72,11 +86,13 @@ export default class IndentTune implements BlockTune {
     private get isDirectionInverted();
     private get rightText();
     private get leftText();
+    private get shouldApplyAutoIndent();
     private onKeyDown;
     private handleIndentLeft;
     private handleIndentRight;
     private indentBlock;
     private unIndentBlock;
+    private autoIndentBlock;
     private toggleDisableStateForButtons;
     private getTuneButton;
     private getTuneByName;
