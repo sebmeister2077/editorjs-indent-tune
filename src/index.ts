@@ -9,6 +9,17 @@ export type TextDirection = 'ltr' | "rtl"
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
     /**
+     * enable auto indent if not null or false
+     */
+    autoIndent?: {
+        enabled?: boolean
+        /**
+         * Tunes you want to apply auto indent for.
+         * Defaults to all.
+         */
+        tuneNames?: string[]
+    }
+    /**
      * apply a highlight to the indent if not null
      */
     highlightIndent?: {
@@ -76,6 +87,7 @@ export default class IndentTune implements BlockTune {
             maxIndent: 8,
             minIndent: 0,
             multiblock: false,
+            autoIndent: { enabled: false, tuneNames: [] },
             tuneName: null,
             orientation: 'horizontal',
             customBlockIndentLimits: {},
@@ -102,13 +114,22 @@ export default class IndentTune implements BlockTune {
         if (this.config.multiblock && !this.config.tuneName)
             console.error("IndentTune config 'tuneName' was not provided, this is required for multiblock option to work.")
 
-        window.addEventListener("resize", (e) => this.onResize.call(this, e));
+        window.addEventListener('resize', (e) => this.onResize.call(this, e))
+
+        if (this.shouldApplyAutoIndent(this.config.autoIndent)) {
+            queueMicrotask(() => this.autoIndentBlock())
+        }
     }
 
     // prepare?(): void | Promise<void> {
     // }
     // reset?(): void | Promise<void> {
     // }
+
+    private shouldApplyAutoIndent(autoIndentConfig: IndentTuneConfigOptions['autoIndent']): boolean {
+        if (!autoIndentConfig?.enabled) return false
+        return !autoIndentConfig.tuneNames?.length || autoIndentConfig.tuneNames.includes(this.block?.name ?? '')
+    }
 
     public render(): HTMLElement | TunesMenuConfig {
         //Disable items after they are rendered synchronously
@@ -346,6 +367,23 @@ export default class IndentTune implements BlockTune {
         this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
 
         this.toggleDisableStateForButtons()
+    }
+
+    private autoIndentBlock() {
+        const currentBlockIndex = this.api.blocks.getBlockIndex(this.block!.id)
+        const previousBlock = this.api.blocks.getBlockByIndex(currentBlockIndex - 1)
+
+        if (!previousBlock) {
+            return
+        }
+
+        const previousBlockIndentLevel = Number(
+            previousBlock.holder?.querySelector(`[${IndentTune.DATA_WRAPPER_NAME}]`)?.getAttribute(IndentTune.DATA_INDENT_LEVEL),
+        )
+
+        this.data.indentLevel = previousBlockIndentLevel
+
+        this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
     }
 
     private toggleDisableStateForButtons() {
