@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Test indent</title>
+        <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.27.0"></script>
+        <script src="
+https://cdn.jsdelivr.net/npm/@editorjs/header@2.8.7/dist/header.umd.min.js
+"></script>
+        <script src="
+https://cdn.jsdelivr.net/npm/@editorjs/list@1.10.0/dist/list.umd.min.js
+"></script>
+        <script src="./local-testing-alignment-tune.js"></script>
+        <script src="./dist/dev-build.js"></script>
+        <style>
+            .ce-block__content::before {
+                content: '';
+                width: 20px;
+                display: block;
+                height: 1.6em;
+                right: 100%;
+                top: 50%;
+                position: absolute;
+                transform: translate(0px, -50%);
+            }
+
+            [data-focused] .test {
+                background-color: yellow;
+            }
+            canvas {
+                width: 700px;
+                height: 500px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="editor" style="background-color: antiquewhite"></div>
+        <script>
+            const IndentTune = self.IndentPlugin
+            const dataLocation = 'indent-editorjs-data-testing'
+
+            let data = {}
+            try {
+                data = JSON.parse(localStorage.getItem(dataLocation))
+            } catch {}
+            var editor = new EditorJS({
+                holder: 'editor',
+                tunes: ['alignmentTune', 'indentTune'],
+                tools: {
+                    list: {
+                        class: self.List,
+                    },
+                    header: {
+                        class: self.Header,
+                    },
+                    alignmentTune: { class: self.AlignmentBlockTune },
+                    indentTune: {
+                        class: IndentTune,
+                        config: {
+                            highlightIndent: {
+                                // className: 'test',
+                            },
+                            // orientation: 'vertical',
+                            multiblock: true,
+                            tuneName: 'indentTune',
+                            indentSize: 20,
+                            maxIndent: 14,
+                            // direction: 'rtl',
+                            // directionChangeHandler: AlignmentBlockTune.addChangeListener,
+                            autoIndent: {
+                                tuneNames: ['paragraph'],
+                            },
+                            customBlockIndentLimits: {
+                                paragraph: {
+                                    min: 5,
+                                    max: 12,
+                                },
+                            },
+                        },
+                    },
+                },
+                // readOnly: true,
+                onChange(api) {
+                    api.saver.save().then((data) => {
+                        localStorage.setItem(dataLocation, JSON.stringify(data))
+                    })
+                },
+                data,
+            })
+        </script>
+        <style>
+            .ce-tune-alignment--right {
+                text-align: right;
+            }
+            .ce-tune-alignment--center {
+                text-align: center;
+            }
+            .ce-tune-alignment--left {
+                text-align: left;
+            }
+        </style>
+    </body>
+</html>
