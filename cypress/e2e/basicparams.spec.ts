@@ -25,7 +25,8 @@ describe("Test editor basic params", () => {
 
 
         context(`Verify version ${version}`, () => {
-
+            cy.loadEditorJsVersion(version, editorData);
+            cy.waitForEditorToLoad();
 
             it("It works", () => {
 

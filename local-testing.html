@@ -4,7 +4,15 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Test indent</title>
-        <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.27.0"></script>
+        <script>
+            if (!globalThis.Cypress) {
+                window.editorVersion = '2.27.0'
+                document.writeln(
+                    `<script onload="window.dispatchEvent(new CustomEvent('loadded-editorjs-script'));" src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@${window.editorVersion}"><\/script>`,
+                )
+            } else {
+            }
+        </script>
         <script src="
 https://cdn.jsdelivr.net/npm/@editorjs/header@2.8.7/dist/header.umd.min.js
 "></script>
@@ -37,56 +45,75 @@ https://cdn.jsdelivr.net/npm/@editorjs/list@1.10.0/dist/list.umd.min.js
     <body>
         <div id="editor" style="background-color: antiquewhite"></div>
         <script>
-            const IndentTune = self.IndentPlugin
-            const dataLocation = 'indent-editorjs-data-testing'
-
-            let data = {}
-            try {
-                data = JSON.parse(localStorage.getItem(dataLocation))
-            } catch {}
-            var editor = new EditorJS({
-                holder: 'editor',
-                tunes: ['alignmentTune', 'indentTune'],
-                tools: {
-                    list: {
-                        class: self.List,
-                    },
-                    header: {
-                        class: self.Header,
-                    },
-                    alignmentTune: { class: self.AlignmentBlockTune },
-                    indentTune: {
-                        class: IndentTune,
-                        config: {
-                            highlightIndent: {
-                                // className: 'test',
-                            },
-                            // orientation: 'vertical',
-                            multiblock: true,
-                            tuneName: 'indentTune',
-                            indentSize: 20,
-                            maxIndent: 14,
-                            // direction: 'rtl',
-                            // directionChangeHandler: AlignmentBlockTune.addChangeListener,
-                            autoIndent: {
-                                tuneNames: ['paragraph'],
-                            },
-                            customBlockIndentLimits: {
-                                paragraph: {
-                                    min: 5,
-                                    max: 12,
+            // local development
+            if (!globalThis.Cypress) {
+                queueMicrotask(() => {
+                    let data = {}
+                    try {
+                        data = JSON.parse(localStorage.getItem(dataLocation))
+                    } catch {}
+                    window.dispatchEvent(
+                        new CustomEvent('loadded-editorjs-script', {
+                            detail: {
+                                data,
+                                config: {
+                                    highlightIndent: {
+                                        // className: 'test',
+                                    },
+                                    // orientation: 'vertical',
+                                    multiblock: true,
+                                    tuneName: 'indentTune',
+                                    indentSize: 20,
+                                    maxIndent: 14,
+                                    // direction: 'rtl',
+                                    // directionChangeHandler: AlignmentBlockTune.addChangeListener,
+                                    autoIndent: {
+                                        tuneNames: ['paragraph'],
+                                    },
+                                    customBlockIndentLimits: {
+                                        paragraph: {
+                                            min: 5,
+                                            max: 12,
+                                        },
+                                    },
                                 },
                             },
+                        }),
+                    )
+                })
+            }
+            window.addEventListener('loadded-editorjs-script', (e) => {
+                if (!(e instanceof CustomEvent)) return
+                const editorData = e.detail.data
+                const config = e.detail.config ?? {}
+                const version = window.editorVersion
+                const IndentTune = self.IndentPlugin
+                const dataLocation = 'indent-editorjs-data-testing'
+
+                var editor = new EditorJS({
+                    holder: 'editor',
+                    tunes: ['alignmentTune', 'indentTune'],
+                    tools: {
+                        list: {
+                            class: self.List,
+                        },
+                        header: {
+                            class: self.Header,
+                        },
+                        alignmentTune: { class: self.AlignmentBlockTune },
+                        indentTune: {
+                            class: IndentTune,
+                            config,
                         },
                     },
-                },
-                // readOnly: true,
-                onChange(api) {
-                    api.saver.save().then((data) => {
-                        localStorage.setItem(dataLocation, JSON.stringify(data))
-                    })
-                },
-                data,
+                    // readOnly: true,
+                    // onChange(api) {
+                    //     api.saver.save().then((data) => {
+                    //         localStorage.setItem(dataLocation, JSON.stringify(data))
+                    //     })
+                    // },
+                    data: editorData,
+                })
             })
         </script>
         <style>
