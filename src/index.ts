@@ -149,6 +149,7 @@ export default class IndentTune implements BlockTune {
                     onActivate: (item, event) => {
                         this.handleIndentRight();
                         // override editorjs internal title copy
+                        //@ts-ignore
                         item.title = this.rightText;
                     },
                     icon: IconChevronRight,
