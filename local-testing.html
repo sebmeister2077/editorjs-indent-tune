@@ -45,6 +45,7 @@ https://cdn.jsdelivr.net/npm/@editorjs/list@1.10.0/dist/list.umd.min.js
     <body>
         <div id="editor" style="background-color: antiquewhite"></div>
         <script>
+            const dataLocation = 'editorjs-indentTune-data'
             // local development
             if (!globalThis.Cypress) {
                 queueMicrotask(() => {
@@ -83,14 +84,12 @@ https://cdn.jsdelivr.net/npm/@editorjs/list@1.10.0/dist/list.umd.min.js
                 })
             }
             window.addEventListener('loadded-editorjs-script', (e) => {
-                if (!(e instanceof CustomEvent)) return
                 const editorData = e.detail.data
                 const config = e.detail.config ?? {}
                 const version = window.editorVersion
                 const IndentTune = self.IndentPlugin
-                const dataLocation = 'indent-editorjs-data-testing'
 
-                var editor = new EditorJS({
+                const editor = new EditorJS({
                     holder: 'editor',
                     tunes: ['alignmentTune', 'indentTune'],
                     tools: {
@@ -114,6 +113,7 @@ https://cdn.jsdelivr.net/npm/@editorjs/list@1.10.0/dist/list.umd.min.js
                     // },
                     data: editorData,
                 })
+                window.editor = editor
             })
         </script>
         <style>
