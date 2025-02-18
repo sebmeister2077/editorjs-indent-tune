@@ -6,7 +6,7 @@
         <title>Test indent</title>
         <script>
             if (!globalThis.Cypress) {
-                window.editorVersion = '2.27.0'
+                window.editorVersion = '2.29'
                 document.writeln(
                     `<script onload="window.dispatchEvent(new CustomEvent('loadded-editorjs-script'));" src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@${window.editorVersion}"><\/script>`,
                 )
@@ -22,7 +22,7 @@ https://cdn.jsdelivr.net/npm/@editorjs/list@1.10.0/dist/list.umd.min.js
         <script src="./local-testing-alignment-tune.js"></script>
         <script src="./dist/dev-build.js"></script>
         <style>
-            .ce-block__content::before {
+            /* .ce-block__content::before {
                 content: '';
                 width: 20px;
                 display: block;
@@ -31,15 +31,7 @@ https://cdn.jsdelivr.net/npm/@editorjs/list@1.10.0/dist/list.umd.min.js
                 top: 50%;
                 position: absolute;
                 transform: translate(0px, -50%);
-            }
-
-            [data-focused] .test {
-                background-color: yellow;
-            }
-            canvas {
-                width: 700px;
-                height: 500px;
-            }
+            } */
         </style>
     </head>
     <body>
@@ -52,6 +44,7 @@ https://cdn.jsdelivr.net/npm/@editorjs/list@1.10.0/dist/list.umd.min.js
                     let data = {}
                     try {
                         data = JSON.parse(localStorage.getItem(dataLocation))
+                        console.log('🚀 ~ queueMicrotask ~ data:', data)
                     } catch {}
                     window.dispatchEvent(
                         new CustomEvent('loadded-editorjs-script', {
@@ -64,18 +57,18 @@ https://cdn.jsdelivr.net/npm/@editorjs/list@1.10.0/dist/list.umd.min.js
                                     // orientation: 'vertical',
                                     multiblock: true,
                                     tuneName: 'indentTune',
-                                    indentSize: 20,
-                                    maxIndent: 14,
+                                    // indentSize: 20,
+                                    // maxIndent: 14,
                                     // direction: 'rtl',
                                     // directionChangeHandler: AlignmentBlockTune.addChangeListener,
-                                    autoIndent: {
-                                        tuneNames: ['paragraph'],
-                                    },
+                                    // autoIndent: {
+                                    //     tuneNames: ['paragraph'],
+                                    // },
                                     customBlockIndentLimits: {
-                                        paragraph: {
-                                            min: 5,
-                                            max: 12,
-                                        },
+                                        // paragraph: {
+                                        //     min: 5,
+                                        //     max: 12,
+                                        // },
                                     },
                                 },
                             },

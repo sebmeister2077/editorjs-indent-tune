@@ -1,32 +1,62 @@
 {
-    "time": 1731765918406,
+    "time": 1739902837452,
     "blocks": [
         {
-            "id": "c2-uW3Qz3R",
-            "type": "paragraph",
-            "data": { "text": "addsa a     ds ad   fd shjdsfhjsdfhkjsdhfjhsdf jhfjkds  jdshkfhsdj" },
-            "tunes": {}
-        },
-        {
-            "id": "Ampu3ILBN-",
-            "type": "paragraph",
-            "data": { "text": "<u class=\"cdx-underline\">dsad</u>" },
-            "tunes": {}
-        },
-        {
-            "id": "cU3n_qPP4H",
-            "type": "paragraph",
-            "data": { "text": "dfdsfd<u class=\"cdx-underline\">sfsdfsdfsdfsdfsa</u>" },
-            "tunes": {}
-        },
-        {
-            "id": "86TeX8AWdd",
+            "id": "AkaGXzdRB9",
             "type": "paragraph",
             "data": {
-                "text": "asd<i> ds<b>ad as</b>j</i><i>k</i><i>h</i><i> </i>dhsad jas hkjh dkjh<b>askh</b><b>jd</b><b> d</b><b></b><b></b>sada"
+                "text": "Adaug eu ceva text&nbsp;"
             },
-            "tunes": {}
+            "tunes": {
+                "alignmentTune": {
+                    "alignment": "left"
+                }
+            }
+        },
+        {
+            "id": "0OfUxYNoRE",
+            "type": "paragraph",
+            "data": {
+                "text": "Niste paragrafe <i>pentru indent </i>ok?"
+            },
+            "tunes": {
+                "alignmentTune": {
+                    "alignment": "left"
+                }
+            }
+        },
+        {
+            "id": "ndhbDolgfk",
+            "type": "paragraph",
+            "data": {
+                "text": "Ce zici de <b>acest <i>lucru</i></b>",
+                "level": 4
+            },
+            "tunes": {
+                "alignmentTune": {
+                    "alignment": "left"
+                },
+                "indentTune": {
+                    "indentLevel": 4
+                }
+            }
+        },
+        {
+            "id": "VSsPhT8VTq",
+            "type": "header",
+            "data": {
+                "text": "Acesta este un heading",
+                "level": 1
+            },
+            "tunes": {
+                "alignmentTune": {
+                    "alignment": "left"
+                },
+                "indentTune": {
+                    "indentLevel": 1
+                }
+            }
         }
     ],
-    "version": "2.27.1"
+    "version": "2.27.0"
 }

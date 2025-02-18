@@ -1,9 +1,10 @@
 import EditorJS from '@editorjs/editorjs'
+import { EDITOR_CLASSES, WRAPPER_ATTRIBUTE_NAME } from './constants'
 
 // Cypress.Commands.add()
 Cypress.Commands.add('applyBiggerGlobalFontSize', () => {
     cy.get("head").then(head => {
-        head[0].insertAdjacentHTML("beforeend", /*html*/`<style>*{
+        head[0].insertAdjacentHTML("beforeend", /*html*/`<style>.codex-editor__redactor *{
                 font-size:1.5rem !important;
             }</style>`)
     })
@@ -40,9 +41,28 @@ Cypress.Commands.add("waitForEditorToLoad", () => {
 Cypress.Commands.add("getBlockByIndex", function (index: number) {
 
     return cy.document().then(function (doc) {
-        return doc.querySelector(`.ce-block:nth-child(${index + 1}) .ce-block__content`) as HTMLElement;
+        return doc.querySelector(`.${EDITOR_CLASSES.BaseBlock}:nth-child(${index + 1})`) as HTMLElement;
     })
 })
+Cypress.Commands.add("getBlockWrapperByIndex", function (index: number) {
+    return cy.document().then(function (doc) {
+        return doc.querySelector(`.${EDITOR_CLASSES.BaseBlock}:nth-child(${index + 1}) [${WRAPPER_ATTRIBUTE_NAME}]`) as HTMLElement;
+    })
+})
+
+Cypress.Commands.add("openToolbarForBlockIndex", function (index: number) {
+    cy.get(`.${EDITOR_CLASSES.BaseBlock}:nth-child(${index + 1})`).click();
+    cy.get(`.${EDITOR_CLASSES.ToolbarSettings}`).should("be.visible").click()
+})
+
+Cypress.Commands.add("indentBlockUsingToolbar", function (direction: "left" | "right", amount: number = 1) {
+    const chainableElement = cy.get(`.${EDITOR_CLASSES.ToolbarIndentRoot} [data-tune-indent-${direction}]`);
+
+    for (let i = 0; i < amount; i++) {
+        chainableElement.click()
+    }
+})
+
 
 declare global {
     namespace Cypress {
@@ -53,6 +73,9 @@ declare global {
             loadEditorJsVersion(version: string, data: any, config?: Object): Cypress.Chainable<void>;
             waitForEditorToLoad(): Cypress.Chainable<void>;
             getBlockByIndex(index: number): Cypress.Chainable<JQuery<HTMLElement>>;
+            getBlockWrapperByIndex(index: number): Cypress.Chainable<JQuery<HTMLElement>>;
+            openToolbarForBlockIndex(index: number): Cypress.Chainable<void>;
+            indentBlockUsingToolbar(direction: "left" | "right", amount?: number): Chainable<void>;
         }
     }
     interface Window {
