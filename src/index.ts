@@ -159,6 +159,7 @@ export default class IndentTune implements BlockTune {
                     title: this.leftText,
                     onActivate: (item, event) => {
                         this.handleIndentLeft()
+                        //@ts-ignore
                         item.title = this.leftText;
                     },
                     icon: IconChevronLeft,
