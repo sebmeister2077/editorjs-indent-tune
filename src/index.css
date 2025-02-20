@@ -1,5 +1,12 @@
 .ce-popover-indent-item {
     cursor: default !important;
+    display: flex;
+    align-items: center;
+    padding: 3px;
+}
+
+.ce-popover-indent-item[version^="2.26"] {
+    gap: 10px;
 }
 
 .ce-popover-indent-item:hover {
@@ -7,6 +14,8 @@
 }
 
 .ce-popover-indent-item .ce-popover-item__icon {
+    width: 26px;
+    height: 26px;
     cursor: pointer;
     will-change: background-color;
     transition: 0.3s background-color;
@@ -31,12 +40,17 @@
     outline: none;
 }
 
-.ce-popover-indent-item[version^="2.29"]:hover .ce-popover-item__icon {
+.ce-popover-indent-item:is([version^="2.26"], [version^="2.27"], [version^="2.28"], [version^="2.29"]):hover .ce-popover-item__icon {
     box-shadow: 0 0 0 1px var(--color-border-icon, rgba(201, 201, 204, 0.48)) !important;
     -webkit-box-shadow: 0 0 0 1px var(--color-border-icon, rgba(201, 201, 204, 0.48)) !important;
 }
 
-.ce-popover-indent-item .ce-popover-item__icon:hover {
+.ce-popover-indent-item:is([version^="2.26"], [version^="2.27"], [version^="2.28"], [version^="2.29"]) .ce-popover-item__icon {
+    box-shadow: 0 0 0 1px var(--color-border-icon, rgba(201, 201, 204, 0.48)) !important;
+    -webkit-box-shadow: 0 0 0 1px var(--color-border-icon, rgba(201, 201, 204, 0.48)) !important;
+}
+
+.ce-popover-indent-item:is([version^="2.26"], [version^="2.27"], [version^="2.28"], [version^="2.29"]) .ce-popover-item__icon:hover {
     background-color: var(--color-background-item-hover, #eff2f5);
 }
 
