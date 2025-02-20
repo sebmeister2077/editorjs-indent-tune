@@ -537,7 +537,10 @@ export default class IndentTune implements BlockTune {
     }
 
     private getWrapperBlockById(blockId: string) {
-        return document.querySelector(`.${this.EditorCSS.block}[data-id="${blockId}"] [${IndentTune.DATA_WRAPPER_NAME}]`)
+        const selector = `.${this.EditorCSS.block}[data-id="${blockId}"] [${IndentTune.DATA_WRAPPER_NAME}]`
+        return document.querySelector(selector) ??
+            this.api.blocks.getById(blockId)?.holder.querySelector(`[${IndentTune.DATA_WRAPPER_NAME}]`)
+            ?? null;
     }
 
     private getBlockForWrapper(wrapper: HTMLElement): HTMLElement | null {
