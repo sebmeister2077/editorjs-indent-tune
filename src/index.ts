@@ -137,11 +137,23 @@ export default class IndentTune implements BlockTune {
 
     public render(): HTMLElement | TunesMenuConfig {
         //Disable items after they are rendered synchronously
+        const disableItemOnRender = () => {
+            if (this.data.indentLevel == this.maxIndent) {
+                const element = this.getTuneButton('indent');
+                element?.classList.add(this.CSS.disabledItem)
+                if (!element) return true;
+
+            }
+            if (this.data.indentLevel == this.minIndent) {
+                const element = this.getTuneButton('unindent');
+                element?.classList.add(this.CSS.disabledItem)
+                if (!element) return true;
+            }
+        }
         queueMicrotask(() => {
-            if (this.data.indentLevel == this.maxIndent)
-                this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
-            if (this.data.indentLevel == this.minIndent)
-                this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
+            const shouldUseMacroTask = disableItemOnRender();
+            if (shouldUseMacroTask)
+                setTimeout(disableItemOnRender, 300)
         })
 
 
