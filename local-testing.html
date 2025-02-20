@@ -6,7 +6,7 @@
         <title>Test indent</title>
         <script>
             if (!globalThis.Cypress) {
-                window.editorVersion = '2.23'
+                window.editorVersion = '2.26'
                 document.writeln(
                     `<script onload="window.dispatchEvent(new CustomEvent('loadded-editorjs-script'));" src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@${window.editorVersion}"><\/script>`,
                 )
@@ -55,7 +55,7 @@ https://cdn.jsdelivr.net/npm/@editorjs/list@1.10.0/dist/list.umd.min.js
                                     highlightIndent: {
                                         // className: 'test',
                                     },
-                                    // orientation: 'vertical',
+                                    orientation: 'vertical',
                                     multiblock: true,
                                     tuneName: 'indentTune',
                                     // indentSize: 20,

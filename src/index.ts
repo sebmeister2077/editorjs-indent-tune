@@ -68,7 +68,7 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
             multiblock: false
         }
     )
-
+const warnings = { orientation: false };
 export type IndentData = { indentLevel: number }
 export default class IndentTune implements BlockTune {
     public static get isTune() {
@@ -106,6 +106,8 @@ export default class IndentTune implements BlockTune {
             ...(config ?? {}),
         }
 
+        this.changeConfigBasedOnVersionIfNeeded();
+
         if (this.config?.directionChangeHandler) {
             this.config.directionChangeHandler(this.alignmentChangeListener.bind(this));
         }
@@ -126,6 +128,7 @@ export default class IndentTune implements BlockTune {
             queueMicrotask(() => this.autoIndentBlock())
         }
     }
+
 
     public prepare?(): void | Promise<void> {
 
@@ -576,6 +579,18 @@ export default class IndentTune implements BlockTune {
     //         element.style.transitionDuration = "";
     //     })
     // }
+
+    private changeConfigBasedOnVersionIfNeeded() {
+        if (!this.config.version) return;
+
+        if (this.config.version < '2.27' && this.config.orientation === 'vertical') {
+            this.config.orientation = 'horizontal';
+
+            if (!warnings.orientation)
+                console.warn("Current editor version does not support vertical indent tune 'orientation'. View your config input")
+            warnings.orientation = true;
+        }
+    }
 
     private cachedMaxWidthForContent: number | null = null;
     private maxWidthForContent(elementInsideEditor: HTMLElement): number {
