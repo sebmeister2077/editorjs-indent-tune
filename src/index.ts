@@ -9,6 +9,10 @@ export type TextDirection = 'ltr' | "rtl"
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
     /**
+     * Specify the editorjs version so that the styles will match your version
+     */
+    version?: string;
+    /**
      * Enables auto indent if not null or `true`
      * Default disabled.
      */
@@ -95,6 +99,7 @@ export default class IndentTune implements BlockTune {
             handleShortcut: undefined,
             direction: "ltr",
             directionChangeHandler: null,
+            version: "2.29",
         }
         this.config = {
             ...defaultConfig,
@@ -132,11 +137,23 @@ export default class IndentTune implements BlockTune {
 
     public render(): HTMLElement | TunesMenuConfig {
         //Disable items after they are rendered synchronously
+        const disableItemOnRender = () => {
+            if (this.data.indentLevel == this.maxIndent) {
+                const element = this.getTuneButton('indent');
+                element?.classList.add(this.CSS.disabledItem)
+                if (!element) return true;
+
+            }
+            if (this.data.indentLevel == this.minIndent) {
+                const element = this.getTuneButton('unindent');
+                element?.classList.add(this.CSS.disabledItem)
+                if (!element) return true;
+            }
+        }
         queueMicrotask(() => {
-            if (this.data.indentLevel == this.maxIndent)
-                this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
-            if (this.data.indentLevel == this.minIndent)
-                this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
+            const shouldUseMacroTask = disableItemOnRender();
+            if (shouldUseMacroTask)
+                setTimeout(disableItemOnRender, 300)
         })
 
 
@@ -169,9 +186,9 @@ export default class IndentTune implements BlockTune {
         }
 
         const html = /*html*/ `
-			<div class="${this.CSS.popoverItem} ${this.CSS.customPopoverItem}" data-item-name='indent'>
+			<div class="${this.CSS.popoverItem} ${this.CSS.customPopoverItem}" data-item-name='indent' version=${this.config.version}>
 				<button type="button" class="${this.CSS.popoverItemIcon}" data-${this.TuneNames.indentLeft}>${IconChevronLeft}</button>
-				<div class="${this.CSS.popoverItemTitle}">${this.api.sanitizer.clean(this.api.i18n.t('Indent'), {})}</div>
+				<span class="${this.CSS.popoverItemTitle}">${this.api.sanitizer.clean(this.api.i18n.t('Indent'), {})}</span>
 				<button type="button" class="${this.CSS.popoverItemIcon}" data-${this.TuneNames.indentRight} style="margin-left:10px;">${IconChevronRight}</button>
 			</div>
 		`
