@@ -9,6 +9,10 @@ export type TextDirection = 'ltr' | "rtl"
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
     /**
+     * Specify the editorjs version so that the styles will match your version
+     */
+    version?: string;
+    /**
      * Enables auto indent if not null or `true`
      * Default disabled.
      */
@@ -95,6 +99,7 @@ export default class IndentTune implements BlockTune {
             handleShortcut: undefined,
             direction: "ltr",
             directionChangeHandler: null,
+            version: "2.29",
         }
         this.config = {
             ...defaultConfig,
@@ -169,7 +174,7 @@ export default class IndentTune implements BlockTune {
         }
 
         const html = /*html*/ `
-			<div class="${this.CSS.popoverItem} ${this.CSS.customPopoverItem}" data-item-name='indent'>
+			<div class="${this.CSS.popoverItem} ${this.CSS.customPopoverItem}" data-item-name='indent' version=${this.config.version}>
 				<button type="button" class="${this.CSS.popoverItemIcon}" data-${this.TuneNames.indentLeft}>${IconChevronLeft}</button>
 				<div class="${this.CSS.popoverItemTitle}">${this.api.sanitizer.clean(this.api.i18n.t('Indent'), {})}</div>
 				<button type="button" class="${this.CSS.popoverItemIcon}" data-${this.TuneNames.indentRight} style="margin-left:10px;">${IconChevronRight}</button>
