@@ -34,7 +34,11 @@ const editor = new EditorJS({
      * Connect tool
      */
     tools: {
-        indentTune: IndentTune,
+        indentTune: {
+                class: IndentTune,
+                // recommended for version based style adjustments
+                version: EditorJS.version,
+            },
     },
 
     /**
@@ -101,6 +105,7 @@ const editor = new EditorJS({
         indentTune: {
             class: IndentTune,
             config: {
+                version: EditorJS.version,
                 customBlockIndentLimits: {
                     someOtherBlock: { max: 5 },
                 },
@@ -176,6 +181,7 @@ Selection of the **IndentLevel** can be accesed from the `IndentTune.DATA_INDENT
 
 | Field                   | Type                                                                                                       | Description                                                                                                                                                                                                                                                               | Default      |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| version | `string` | Recommended to pass editor version for seamless style adjustments | `2.29` |
 | indentSize              | `number`                                                                                                   | Size of one indent level (in pixels)                                                                                                                                                                                                                                      | `24`         |
 | maxIndent               | `number`                                                                                                   | The upper indent limit of any block                                                                                                                                                                                                                                       | `8`          |
 | minIndent               | `number`                                                                                                   | The lower indent limit of any block                                                                                                                                                                                                                                       | `0`          |
