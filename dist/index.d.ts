@@ -5,6 +5,10 @@ export type TextDirection = 'ltr' | "rtl";
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>;
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
     /**
+     * Specify the editorjs version so that the styles will match your version
+     */
+    version?: string;
+    /**
      * Enables auto indent if not null or `true`
      * Default disabled.
      */
@@ -107,6 +111,7 @@ export default class IndentTune implements BlockTune {
     private getBlockForWrapper;
     private alignmentChangeListener;
     private createElementFromTemplate;
+    private changeConfigBasedOnVersionIfNeeded;
     private cachedMaxWidthForContent;
     private maxWidthForContent;
 }

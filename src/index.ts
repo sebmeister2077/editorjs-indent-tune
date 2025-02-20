@@ -9,6 +9,10 @@ export type TextDirection = 'ltr' | "rtl"
 export type IndentTuneConfig = Partial<IndentTuneConfigOptions>
 export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIndent', number> & {
     /**
+     * Specify the editorjs version so that the styles will match your version
+     */
+    version?: string;
+    /**
      * Enables auto indent if not null or `true`
      * Default disabled.
      */
@@ -64,7 +68,7 @@ export type IndentTuneConfigOptions = Record<'indentSize' | 'maxIndent' | 'minIn
             multiblock: false
         }
     )
-
+const warnings = { orientation: false };
 export type IndentData = { indentLevel: number }
 export default class IndentTune implements BlockTune {
     public static get isTune() {
@@ -95,11 +99,14 @@ export default class IndentTune implements BlockTune {
             handleShortcut: undefined,
             direction: "ltr",
             directionChangeHandler: null,
+            version: "2.29",
         }
         this.config = {
             ...defaultConfig,
             ...(config ?? {}),
         }
+
+        this.changeConfigBasedOnVersionIfNeeded();
 
         if (this.config?.directionChangeHandler) {
             this.config.directionChangeHandler(this.alignmentChangeListener.bind(this));
@@ -122,6 +129,7 @@ export default class IndentTune implements BlockTune {
         }
     }
 
+
     public prepare?(): void | Promise<void> {
 
     }
@@ -132,11 +140,23 @@ export default class IndentTune implements BlockTune {
 
     public render(): HTMLElement | TunesMenuConfig {
         //Disable items after they are rendered synchronously
+        const disableItemOnRender = () => {
+            if (this.data.indentLevel == this.maxIndent) {
+                const element = this.getTuneButton('indent');
+                element?.classList.add(this.CSS.disabledItem)
+                if (!element) return true;
+
+            }
+            if (this.data.indentLevel == this.minIndent) {
+                const element = this.getTuneButton('unindent');
+                element?.classList.add(this.CSS.disabledItem)
+                if (!element) return true;
+            }
+        }
         queueMicrotask(() => {
-            if (this.data.indentLevel == this.maxIndent)
-                this.getTuneButton('indent')?.classList.add(this.CSS.disabledItem)
-            if (this.data.indentLevel == this.minIndent)
-                this.getTuneButton('unindent')?.classList.add(this.CSS.disabledItem)
+            const shouldUseMacroTask = disableItemOnRender();
+            if (shouldUseMacroTask)
+                setTimeout(disableItemOnRender, 300)
         })
 
 
@@ -169,9 +189,9 @@ export default class IndentTune implements BlockTune {
         }
 
         const html = /*html*/ `
-			<div class="${this.CSS.popoverItem} ${this.CSS.customPopoverItem}" data-item-name='indent'>
+			<div class="${this.CSS.popoverItem} ${this.CSS.customPopoverItem}" data-item-name='indent' version=${this.config.version}>
 				<button type="button" class="${this.CSS.popoverItemIcon}" data-${this.TuneNames.indentLeft}>${IconChevronLeft}</button>
-				<div class="${this.CSS.popoverItemTitle}">${this.api.sanitizer.clean(this.api.i18n.t('Indent'), {})}</div>
+				<span class="${this.CSS.popoverItemTitle}">${this.api.sanitizer.clean(this.api.i18n.t('Indent'), {})}</span>
 				<button type="button" class="${this.CSS.popoverItemIcon}" data-${this.TuneNames.indentRight} style="margin-left:10px;">${IconChevronRight}</button>
 			</div>
 		`
@@ -517,7 +537,10 @@ export default class IndentTune implements BlockTune {
     }
 
     private getWrapperBlockById(blockId: string) {
-        return document.querySelector(`.${this.EditorCSS.block}[data-id="${blockId}"] [${IndentTune.DATA_WRAPPER_NAME}]`)
+        const selector = `.${this.EditorCSS.block}[data-id="${blockId}"] [${IndentTune.DATA_WRAPPER_NAME}]`
+        return document.querySelector(selector) ??
+            this.api.blocks.getById(blockId)?.holder.querySelector(`[${IndentTune.DATA_WRAPPER_NAME}]`)
+            ?? null;
     }
 
     private getBlockForWrapper(wrapper: HTMLElement): HTMLElement | null {
@@ -559,6 +582,18 @@ export default class IndentTune implements BlockTune {
     //         element.style.transitionDuration = "";
     //     })
     // }
+
+    private changeConfigBasedOnVersionIfNeeded() {
+        if (!this.config.version) return;
+
+        if (this.config.version < '2.27' && this.config.orientation === 'vertical') {
+            this.config.orientation = 'horizontal';
+
+            if (!warnings.orientation)
+                console.warn("Current editor version does not support vertical indent tune 'orientation'. View your config input")
+            warnings.orientation = true;
+        }
+    }
 
     private cachedMaxWidthForContent: number | null = null;
     private maxWidthForContent(elementInsideEditor: HTMLElement): number {
