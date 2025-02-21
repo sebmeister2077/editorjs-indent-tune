@@ -2,14 +2,7 @@ import { EDITOR_CLASSES, EDITOR_VERSIONS, TEMP_ENVIRONMENT_URL, WRAPPER_ATTRIBUT
 import editorData from '../fixtures/dataWithIndents.json'
 import { getClassSelectorForBlockType } from "../support/helpers";
 
-
-
-
-
-
-// size, min max
-describe("Test editor default params", () => {
-
+describe("Test editor default functionality", () => {
     before(() => {
         cy.window().then((win) => {
             cy.spy(win.console, 'error').as('consoleError');
@@ -78,7 +71,10 @@ describe("Test editor default params", () => {
 
                     const displayedIndentLevel = $blockWrapper.attr(WRAPPER_ATTRIBUTE_NAME)
                     expect(displayedIndentLevel).to.eq((expectLevel).toString())
-
+                    cy.window().then(win => {
+                        const { paddingLeft } = win.getComputedStyle($blockWrapper[0]);
+                        expect(paddingLeft).to.eq('144px', 'Expect visual indentation on paragraph')
+                    })
 
                 })
 
@@ -112,6 +108,8 @@ describe("Test editor default params", () => {
                 })
 
             })
+
+            //TODO verify the editor data is saved correctly
 
         })
     }
