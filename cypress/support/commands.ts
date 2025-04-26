@@ -46,11 +46,15 @@ Cypress.Commands.add("getBlockByIndex", function (index: number) {
 Cypress.Commands.add("getBlockWrapperByIndex", function (index: number) {
     return cy.document().then(function (doc) {
         return doc.querySelector(`.${EDITOR_CLASSES.BaseBlock}:nth-child(${index + 1}) [${WRAPPER_ATTRIBUTE_NAME}]`) as HTMLElement;
-    }) as Cypress.Chainable<BlockSelector>
+    }) as Cypress.Chainable<WrapperSelector>
 })
 
 Cypress.Commands.add("getHighlightIndent", { prevSubject: true }, function (prev: Cypress.Chainable<JQuery<HTMLElement>>) {
     return prev.get(".ce-highlight-indent");
+})
+
+Cypress.Commands.add("getIndentLevel", { prevSubject: true }, function (prev: Cypress.Chainable<JQuery<HTMLElement>>) {
+    return prev.then($el => parseInt($el.attr("data-indent-level")))
 })
 
 Cypress.Commands.add("openToolbarForBlockIndex", function (index: number) {
@@ -76,10 +80,11 @@ declare global {
             loadEditorJsVersion(version: string, data: any, config?: Object): Cypress.Chainable<void>;
             waitForEditorToLoad(): Cypress.Chainable<void>;
             getBlockByIndex(index: number): Cypress.Chainable<BlockSelector>;
-            getBlockWrapperByIndex(index: number): Cypress.Chainable<BlockSelector>;
+            getBlockWrapperByIndex(index: number): Cypress.Chainable<WrapperSelector>;
             openToolbarForBlockIndex(index: number): Cypress.Chainable<void>;
             indentBlockUsingToolbar(direction: "left" | "right", amount?: number): Chainable<void>;
             getHighlightIndent: Subject extends undefined ? never : Subject extends BlockSelector ? (() => Cypress.Chainable<JQuery<HTMLElement>>) : never;
+            getIndentLevel: Subject extends undefined ? never : Subject extends WrapperSelector ? (() => Cypress.Chainable<number>) : never;
         }
     }
     interface Window {
@@ -89,6 +94,7 @@ declare global {
     }
 }
 
+type WrapperSelector = BlockSelector & { _wrapper: never }
 type BlockSelector = JQuery<HTMLElement> & { _blocksel: never }
 
 export { }
