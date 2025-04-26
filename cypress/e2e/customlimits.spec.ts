@@ -2,15 +2,14 @@ import { EDITOR_FEATURE_VERSIONS, EDITOR_VERSIONS, TEMP_ENVIRONMENT_URL } from "
 import editorData from '../fixtures/dataWithIndents.json';
 
 describe("Test editor custom block limits", () => {
-    before(() => {
-        cy.window().then((win) => {
-            cy.spy(win.console, 'error').as('consoleError');
-        });
-    })
-
     beforeEach(() => {
         cy.visit(TEMP_ENVIRONMENT_URL)
         cy.applyBiggerGlobalFontSize();
+        cy.interceptConsoleErrors()
+    })
+
+    afterEach(() => {
+        cy.assertNoConsoleErrors()
     })
 
     const defaultMin = 0
@@ -21,129 +20,126 @@ describe("Test editor custom block limits", () => {
 
         context(`Verify version ${version}`, () => {
 
-            context("I want only paragraph to have custom limits", () => {
-                it("Give empty limits object", () => {
-                    const blockIndex = 1
+            it("Give empty limits object", () => {
+                const blockIndex = 1
 
-                    cy.loadEditorJsVersion(version, editorData, {
-                        customBlockIndentLimits: {
-                            paragraph: {
+                cy.loadEditorJsVersion(version, editorData, {
+                    customBlockIndentLimits: {
+                        paragraph: {
 
-                            }
                         }
-                    });
-                    cy.waitForEditorToLoad();
+                    }
+                });
+                cy.waitForEditorToLoad();
 
-                    cy.openToolbarForBlockIndex(blockIndex);
+                cy.openToolbarForBlockIndex(blockIndex);
 
-                    cy.indentBlockUsingToolbar("left", 10)
-                    cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", defaultMin)
+                cy.indentBlockUsingToolbar("left", 10)
 
-                    cy.indentBlockUsingToolbar("right", 10)
-                    cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", defaultMax)
+                cy.getBlockWrapperByIndex(blockIndex).getIndentLevel()
+                cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", defaultMin)
 
-                })
+                cy.indentBlockUsingToolbar("right", 10)
+                cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", defaultMax)
+
+            })
 
 
-                it("Give empty limits object but use global min max as fallback", () => {
-                    const minIndent = 1;
-                    const maxIndent = 6;
-                    const blockIndex = 1
+            it("Give empty limits object but use global min max as fallback", () => {
+                const minIndent = 1;
+                const maxIndent = 6;
+                const blockIndex = 1
 
-                    cy.loadEditorJsVersion(version, editorData, {
-                        customBlockIndentLimits: {
-                        },
-                        minIndent,
-                        maxIndent,
-                    });
-                    cy.waitForEditorToLoad();
+                cy.loadEditorJsVersion(version, editorData, {
+                    customBlockIndentLimits: {
+                    },
+                    minIndent,
+                    maxIndent,
+                });
+                cy.waitForEditorToLoad();
 
-                    cy.openToolbarForBlockIndex(blockIndex);
+                cy.openToolbarForBlockIndex(blockIndex);
 
-                    cy.indentBlockUsingToolbar("left", 10)
-                    cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", minIndent)
+                cy.indentBlockUsingToolbar("left", 10)
+                cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", minIndent)
 
-                    cy.indentBlockUsingToolbar("right", 10)
-                    cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", maxIndent)
-                })
+                cy.indentBlockUsingToolbar("right", 10)
+                cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", maxIndent)
+            })
 
-                it("Give only min property", () => {
-                    const minIndent = 2;
-                    const blockIndex = 1;
-                    const indentAmount = 13;
+            it("Give only min property", () => {
+                const minIndent = 2;
+                const blockIndex = 1;
+                const indentAmount = 13;
 
-                    const expectLevel = minIndent;
+                const expectLevel = minIndent;
 
-                    cy.loadEditorJsVersion(version, editorData, {
-                        customBlockIndentLimits: {
-                            paragraph: {
-                                min: minIndent
-                            }
+                cy.loadEditorJsVersion(version, editorData, {
+                    customBlockIndentLimits: {
+                        paragraph: {
+                            min: minIndent
                         }
-                    });
-                    cy.waitForEditorToLoad();
+                    }
+                });
+                cy.waitForEditorToLoad();
 
-                    cy.openToolbarForBlockIndex(blockIndex);
+                cy.openToolbarForBlockIndex(blockIndex);
 
-                    cy.indentBlockUsingToolbar("left", indentAmount)
-                    cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", expectLevel)
+                cy.indentBlockUsingToolbar("left", indentAmount)
+                cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", expectLevel)
 
-                    cy.indentBlockUsingToolbar("right", indentAmount)
-                    cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", defaultMax)
+                cy.indentBlockUsingToolbar("right", indentAmount)
+                cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", defaultMax)
 
 
-                })
+            })
 
-                it("Give only max property", () => {
-                    const maxIndent = 6;
-                    const blockIndex = 1;
-                    const indentAmount = 13;
+            it("Give only max property", () => {
+                const maxIndent = 6;
+                const blockIndex = 1;
+                const indentAmount = 13;
 
-                    const expectLevel = maxIndent;
-                    cy.loadEditorJsVersion(version, editorData, {
-                        customBlockIndentLimits: {
-                            paragraph: {
-                                max: maxIndent
-                            }
+                const expectLevel = maxIndent;
+                cy.loadEditorJsVersion(version, editorData, {
+                    customBlockIndentLimits: {
+                        paragraph: {
+                            max: maxIndent
                         }
-                    });
-                    cy.waitForEditorToLoad();
+                    }
+                });
+                cy.waitForEditorToLoad();
 
-                    cy.openToolbarForBlockIndex(blockIndex);
+                cy.openToolbarForBlockIndex(blockIndex);
 
-                    cy.indentBlockUsingToolbar("right", indentAmount)
-                    cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", expectLevel)
+                cy.indentBlockUsingToolbar("right", indentAmount)
+                cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", expectLevel)
 
-                    cy.indentBlockUsingToolbar("left", indentAmount)
-                    cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", defaultMin)
+                cy.indentBlockUsingToolbar("left", indentAmount)
+                cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", defaultMin)
+            })
 
+            it("Give both properties for only paragraph", () => {
+                const maxIndent = 7;
+                const minIndent = 2;
+                const blockIndex = 1;
 
-
-                })
-
-                it("Give both properties for only paragraph", () => {
-                    const maxIndent = 7;
-                    const minIndent = 2;
-                    const blockIndex = 1;
-
-                    cy.loadEditorJsVersion(version, editorData, {
-                        customBlockIndentLimits: {
-                            pragraph: {
-                                min: minIndent,
-                                mx: maxIndent
-                            }
+                cy.loadEditorJsVersion(version, editorData, {
+                    customBlockIndentLimits: {
+                        paragraph: {
+                            min: minIndent,
+                            max: maxIndent
                         }
-                    });
-                    cy.waitForEditorToLoad();
+                    }
+                });
+                cy.waitForEditorToLoad();
 
-                    cy.openToolbarForBlockIndex(blockIndex);
+                cy.openToolbarForBlockIndex(blockIndex);
 
-                    cy.indentBlockUsingToolbar("right", 10)
-                    cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", maxIndent)
+                cy.indentBlockUsingToolbar("right", 10)
+                cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", maxIndent)
 
-                    cy.indentBlockUsingToolbar("left", 10)
-                    cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", minIndent)
-                })
+                cy.indentBlockUsingToolbar("left", 10)
+                cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", minIndent)
             })
 
 
@@ -154,10 +150,10 @@ describe("Test editor custom block limits", () => {
                 cy.loadEditorJsVersion(version, editorData, {
                     customBlockIndentLimits: {
                         header: {
-                            min: maxHeader
+                            max: maxHeader
                         },
                         paragraph: {
-                            max: minParagraph
+                            min: minParagraph
                         }
                     }
                 });
@@ -170,9 +166,13 @@ describe("Test editor custom block limits", () => {
                 cy.indentBlockUsingToolbar("left", 10)
                 cy.getBlockWrapperByIndex(pIndex).getIndentLevel().should("eq", minParagraph)
 
-                cy.openToolbarForBlockIndex(hIndex);
-                cy.indentBlockUsingToolbar("right", 10)
-                cy.getBlockWrapperByIndex(hIndex).getIndentLevel().should("eq", maxHeader)
+                // uhm i think i need an older header version for older editor
+
+                if (version >= "2.26") {
+                    cy.openToolbarForBlockIndex(hIndex);
+                    cy.indentBlockUsingToolbar("right", 10)
+                    cy.getBlockWrapperByIndex(hIndex).getIndentLevel().should("eq", maxHeader)
+                }
 
             })
 

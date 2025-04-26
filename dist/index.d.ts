@@ -75,7 +75,7 @@ export default class IndentTune implements BlockTune {
     data: IndentData;
     private wrapper;
     private DEFAULT_INDENT_KEY;
-    constructor({ api, data, config, block }: BlockToolConstructorOptions<IndentData, IndentTuneConfigOptions>);
+    constructor({ api, data, config, block, ...other }: BlockToolConstructorOptions<IndentData, IndentTuneConfigOptions>);
     prepare?(): void | Promise<void>;
     reset?(): void | Promise<void>;
     render(): HTMLElement | TunesMenuConfig;

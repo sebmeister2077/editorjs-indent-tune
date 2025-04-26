@@ -8,19 +8,22 @@ export const EDITOR_VERSIONS: EditorVersions[keyof EditorVersions][] = [
 ]
 
 export const EDITOR_FEATURE_VERSIONS: ((EditorVersions[keyof EditorVersions]) & FeatureVersion)[] = [
-    "2.18",
-    '2.19',
     '2.20',
-    '2.21',
-    '2.22',
-    '2.23',
-    '2.24',
-    '2.25',
-    '2.26',
-    '2.27',
-    '2.28',
-    '2.29',
     '2.30',
+    '2.29',
+    '2.28',
+    '2.27',
+    '2.26',
+    '2.25',
+    '2.24',
+    '2.23',
+    '2.22',
+    '2.21',
+
+    // Will have to test the keybord interctive way, after i finish all the other unit tests
+    // "2.18",
+    // '2.19',
+
 ]
 
 export const WRAPPER_ATTRIBUTE_NAME = "data-indent-level"
