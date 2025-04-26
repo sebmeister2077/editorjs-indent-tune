@@ -83,7 +83,7 @@ export default class IndentTune implements BlockTune {
     public data: IndentData
     private wrapper: HTMLElement = document.createElement('div')
     private DEFAULT_INDENT_KEY = 'Tab';
-    constructor({ api, data, config, block }: BlockToolConstructorOptions<IndentData, IndentTuneConfigOptions>) {
+    constructor({ api, data, config, block, ...other }: BlockToolConstructorOptions<IndentData, IndentTuneConfigOptions>) {
         this.api = api
         this.block = block
 
@@ -101,6 +101,9 @@ export default class IndentTune implements BlockTune {
             directionChangeHandler: null,
             version: "2.29",
         }
+        if (!config)
+            // for older versions
+            config = (other as any)?.settings ?? {}
         this.config = {
             ...defaultConfig,
             ...(config ?? {}),
@@ -326,7 +329,7 @@ export default class IndentTune implements BlockTune {
         if (isSingleLineBlock) {
             if (isIndent) this.indentBlock()
             else this.unIndentBlock()
-            this.block.dispatchChange()
+            this.block.dispatchChange?.()
             return
         }
 
@@ -353,7 +356,7 @@ export default class IndentTune implements BlockTune {
             }
             if (isIndent) tune.indentLevel = Math.min(this.config.maxIndent, (tune.indentLevel ?? 0) + 1)
             else tune.indentLevel = Math.max(0, (tune.indentLevel ?? 0) - 1)
-            b.dispatchChange()
+            b.dispatchChange?.()
 
             //apply visual feedback manually, since we can't make the tune update on other blocks
             const blockWrapper = this.getWrapperBlockById(b.id)
@@ -368,7 +371,7 @@ export default class IndentTune implements BlockTune {
             this.indentBlock();
         else
             this.unIndentBlock();
-        this.block?.dispatchChange()
+        this.block?.dispatchChange?.()
     }
 
     private handleIndentRight() {
@@ -376,7 +379,7 @@ export default class IndentTune implements BlockTune {
             this.unIndentBlock();
         else
             this.indentBlock();
-        this.block?.dispatchChange()
+        this.block?.dispatchChange?.()
     }
 
     private indentBlock() {
