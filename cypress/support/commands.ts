@@ -39,15 +39,18 @@ Cypress.Commands.add("waitForEditorToLoad", () => {
 })
 
 Cypress.Commands.add("getBlockByIndex", function (index: number) {
-
     return cy.document().then(function (doc) {
         return doc.querySelector(`.${EDITOR_CLASSES.BaseBlock}:nth-child(${index + 1})`) as HTMLElement;
-    })
+    }) as Cypress.Chainable<BlockSelector>
 })
 Cypress.Commands.add("getBlockWrapperByIndex", function (index: number) {
     return cy.document().then(function (doc) {
         return doc.querySelector(`.${EDITOR_CLASSES.BaseBlock}:nth-child(${index + 1}) [${WRAPPER_ATTRIBUTE_NAME}]`) as HTMLElement;
-    })
+    }) as Cypress.Chainable<BlockSelector>
+})
+
+Cypress.Commands.add("getHighlightIndent", { prevSubject: true }, function (prev: Cypress.Chainable<JQuery<HTMLElement>>) {
+    return prev.get(".ce-highlight-indent");
 })
 
 Cypress.Commands.add("openToolbarForBlockIndex", function (index: number) {
@@ -66,16 +69,17 @@ Cypress.Commands.add("indentBlockUsingToolbar", function (direction: "left" | "r
 
 declare global {
     namespace Cypress {
-        interface Chainable {
+        interface Chainable<Subject = any> {
             // applyEditorSelection(startIndex: number, endIndex: number, version: EditorVersions[keyof EditorVersions]): Cypress.Chainable<void>
             // applyUnderline(): Cypress.Chainable<void>
             applyBiggerGlobalFontSize(): Cypress.Chainable<void>
             loadEditorJsVersion(version: string, data: any, config?: Object): Cypress.Chainable<void>;
             waitForEditorToLoad(): Cypress.Chainable<void>;
-            getBlockByIndex(index: number): Cypress.Chainable<JQuery<HTMLElement>>;
-            getBlockWrapperByIndex(index: number): Cypress.Chainable<JQuery<HTMLElement>>;
+            getBlockByIndex(index: number): Cypress.Chainable<BlockSelector>;
+            getBlockWrapperByIndex(index: number): Cypress.Chainable<BlockSelector>;
             openToolbarForBlockIndex(index: number): Cypress.Chainable<void>;
             indentBlockUsingToolbar(direction: "left" | "right", amount?: number): Chainable<void>;
+            getHighlightIndent: Subject extends undefined ? never : Subject extends BlockSelector ? (() => Cypress.Chainable<JQuery<HTMLElement>>) : never;
         }
     }
     interface Window {
@@ -85,5 +89,6 @@ declare global {
     }
 }
 
+type BlockSelector = JQuery<HTMLElement> & { _blocksel: never }
 
 export { }
