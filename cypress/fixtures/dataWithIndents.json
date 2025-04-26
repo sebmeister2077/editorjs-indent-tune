@@ -17,11 +17,15 @@
             "id": "0OfUxYNoRE",
             "type": "paragraph",
             "data": {
-                "text": "Niste paragrafe <i>pentru indent </i>ok?"
+                "text": "Niste paragrafe <i>pentru indent </i>ok?",
+                "level": 3
             },
             "tunes": {
                 "alignmentTune": {
                     "alignment": "left"
+                },
+                "indentTune": {
+                    "indentLevel": 3
                 }
             }
         },

@@ -13,3 +13,6 @@ export type EditorVersions = {
     V19: `2.19${"" | ".0" | ".1" | ".2" | ".3"}`
     V18: `2.18${"" | ".0"}`
 }
+
+type Numbers = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 0;
+export type FeatureVersion = `${Numbers}.${Numbers}${Numbers | ""}`

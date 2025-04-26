@@ -149,12 +149,31 @@ describe("Test editor custom block limits", () => {
 
 
             it("I want paragraph and header to have different custom limits", () => {
+                const maxHeader = 6;
+                const minParagraph = 2
                 cy.loadEditorJsVersion(version, editorData, {
                     customBlockIndentLimits: {
-
+                        header: {
+                            min: maxHeader
+                        },
+                        paragraph: {
+                            max: minParagraph
+                        }
                     }
                 });
                 cy.waitForEditorToLoad();
+
+                const pIndex = 2;
+                const hIndex = 3;
+
+                cy.openToolbarForBlockIndex(pIndex);
+                cy.indentBlockUsingToolbar("left", 10)
+                cy.getBlockWrapperByIndex(pIndex).getIndentLevel().should("eq", minParagraph)
+
+                cy.openToolbarForBlockIndex(hIndex);
+                cy.indentBlockUsingToolbar("right", 10)
+                cy.getBlockWrapperByIndex(hIndex).getIndentLevel().should("eq", maxHeader)
+
             })
 
 
