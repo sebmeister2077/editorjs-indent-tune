@@ -12,7 +12,7 @@ describe("Test indent highlights", () => {
         cy.assertNoConsoleErrors()
     })
 
-    for (let i = 0; i < 1 && 1 < EDITOR_FEATURE_VERSIONS.length; i++) {
+    for (let i = 0; i < EDITOR_FEATURE_VERSIONS.length; i++) {
         const version = EDITOR_FEATURE_VERSIONS[i];
 
 
