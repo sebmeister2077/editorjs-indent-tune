@@ -58,7 +58,7 @@ Cypress.Commands.add("getBlockWrapperByIndex", function (index: number) {
 })
 
 Cypress.Commands.add("getHighlightIndent", { prevSubject: true }, function (prev: JQuery<HTMLElement>) {
-    return cy.wrap(prev).get(".ce-highlight-indent");
+    return cy.wrap(prev).find(".ce-highlight-indent");
 })
 
 Cypress.Commands.add("getIndentLevel", { prevSubject: true }, function (prev: JQuery<HTMLElement>) {
