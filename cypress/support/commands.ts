@@ -7,6 +7,14 @@ Cypress.Commands.add("interceptConsoleErrors", () => {
         cy.spy(win.console, 'error').as('consoleError');
     });
 })
+Cypress.Commands.add("interceptConsoleWarnings", () => {
+    cy.window().then((win) => {
+        cy.spy(win.console, 'warn').as('consoleWarning');
+    });
+})
+Cypress.Commands.add("getConsoleWarnings", () => {
+    return cy.get('@consoleWarning')
+})
 Cypress.Commands.add("assertNoConsoleErrors", () => {
     cy.get('@consoleError').should('not.have.been.called');
 })
@@ -27,7 +35,7 @@ Cypress.Commands.add("loadEditorJsVersion", (version: string, data: any, config:
                 win.dispatchEvent(new CustomEvent("loadded-editorjs-script", {
                     detail: {
                         data,
-                        config
+                        config: { version, ...config }
                     }
                 }))
                 setTimeout(res, 0)
@@ -85,7 +93,9 @@ declare global {
             // applyEditorSelection(startIndex: number, endIndex: number, version: EditorVersions[keyof EditorVersions]): Cypress.Chainable<void>
             // applyUnderline(): Cypress.Chainable<void>
             interceptConsoleErrors(): Cypress.Chainable<void>;
+            interceptConsoleWarnings(): Cypress.Chainable<void>;
             assertNoConsoleErrors(): Cypress.Chainable<void>
+            getConsoleWarnings(): Cypress.Chainable<JQuery<HTMLElement>>;
             applyBiggerGlobalFontSize(): Cypress.Chainable<void>
             loadEditorJsVersion(version: string, data: any, config?: IndentTuneConfig): Cypress.Chainable<void>;
             waitForEditorToLoad(): Cypress.Chainable<void>;

@@ -8,7 +8,6 @@ export const EDITOR_VERSIONS: EditorVersions[keyof EditorVersions][] = [
 ]
 
 export const EDITOR_FEATURE_VERSIONS: ((EditorVersions[keyof EditorVersions]) & FeatureVersion)[] = [
-    '2.20',
     '2.30',
     '2.29',
     '2.28',
@@ -19,6 +18,7 @@ export const EDITOR_FEATURE_VERSIONS: ((EditorVersions[keyof EditorVersions]) & 
     '2.23',
     '2.22',
     '2.21',
+    '2.20',
 
     // Will have to test the keybord interctive way, after i finish all the other unit tests
     // "2.18",
