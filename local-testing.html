@@ -6,7 +6,7 @@
         <title>Test indent</title>
         <script>
             if (!globalThis.Cypress) {
-                window.editorVersion = '2.23'
+                window.editorVersion = '2.30'
                 document.writeln(
                     `<script onload="window.dispatchEvent(new CustomEvent('loadded-editorjs-script'));" src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@${window.editorVersion}"><\/script>`,
                 )
@@ -78,6 +78,18 @@ https://cdn.jsdelivr.net/npm/@editorjs/list@1.10.0/dist/list.umd.min.js
                                         // },
                                     },
                                 },
+                                editorConfig: {
+                                    i18n: {
+                                        messages: {
+                                            blockTunes: {
+                                                indentTune: {
+                                                    // Indent: 'Test1',
+                                                    // 'Un Indent': 'Test2',
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
                             },
                         }),
                     )
@@ -86,6 +98,7 @@ https://cdn.jsdelivr.net/npm/@editorjs/list@1.10.0/dist/list.umd.min.js
             window.addEventListener('loadded-editorjs-script', (e) => {
                 const editorData = e.detail.data
                 const config = e.detail.config ?? {}
+                const editorConfig = e.detail.editorConfig ?? {}
                 const version = window.editorVersion
                 const IndentTune = self.IndentPlugin
 
@@ -105,6 +118,7 @@ https://cdn.jsdelivr.net/npm/@editorjs/list@1.10.0/dist/list.umd.min.js
                             config,
                         },
                     },
+                    ...editorConfig,
                     // readOnly: true,
                     // onChange(api) {
                     //     api.saver.save().then((data) => {

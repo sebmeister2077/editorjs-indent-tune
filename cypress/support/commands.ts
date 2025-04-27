@@ -26,7 +26,7 @@ Cypress.Commands.add('applyBiggerGlobalFontSize', () => {
     })
 })
 
-Cypress.Commands.add("loadEditorJsVersion", (version: string, data: any, config: IndentTuneConfig = {}) => {
+Cypress.Commands.add("loadEditorJsVersion", (version: string, data: any, config: IndentTuneConfig = {}, editorConfig: Object = {}) => {
     cy.window().then(win => {
         return new Cypress.Promise(res => {
             win.editorVersion = version;
@@ -35,7 +35,8 @@ Cypress.Commands.add("loadEditorJsVersion", (version: string, data: any, config:
                 win.dispatchEvent(new CustomEvent("loadded-editorjs-script", {
                     detail: {
                         data,
-                        config: { version, ...config }
+                        config: { version, ...config },
+                        editorConfig
                     }
                 }))
                 setTimeout(res, 0)
@@ -97,7 +98,7 @@ declare global {
             assertNoConsoleErrors(): Cypress.Chainable<void>
             getConsoleWarnings(): Cypress.Chainable<JQuery<HTMLElement>>;
             applyBiggerGlobalFontSize(): Cypress.Chainable<void>
-            loadEditorJsVersion(version: string, data: any, config?: IndentTuneConfig): Cypress.Chainable<void>;
+            loadEditorJsVersion(version: string, data: any, config?: IndentTuneConfig, editorConfig?: Object): Cypress.Chainable<void>;
             waitForEditorToLoad(): Cypress.Chainable<void>;
             getBlockByIndex(index: number): Cypress.Chainable<BlockSelector>;
             getBlockWrapperByIndex(index: number): Cypress.Chainable<WrapperSelector>;
