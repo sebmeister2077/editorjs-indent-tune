@@ -211,9 +211,13 @@ export default class IndentTune implements BlockTune {
         this.wrapper.appendChild(pluginsContent)
         this.wrapper.setAttribute(IndentTune.DATA_WRAPPER_NAME, '')
 
-        const ignoreBlockHighlight = Boolean(!this.config.highlightIndent || this.block?.name && this.config.highlightIndent?.tuneNames?.includes(this.block.name));
-
-        if (!ignoreBlockHighlight) {
+        let applyBlockHighlight = Boolean(this.config.highlightIndent)
+        if (this.config.highlightIndent?.tuneNames) {
+            const shouldIgnoreThisBlock = !this.config.highlightIndent.tuneNames.includes(this.block?.name ?? "")
+            if (shouldIgnoreThisBlock)
+                applyBlockHighlight = false
+        }
+        if (applyBlockHighlight) {
             const highlightEl = this.createElementFromTemplate(/*html*/`
                 <div class="${this.config.highlightIndent?.className ?? ""} ${this.CSS.highlightIndent}">
                 </div>
