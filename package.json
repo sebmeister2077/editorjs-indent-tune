@@ -1,6 +1,6 @@
 {
     "name": "editorjs-indent-tune",
-    "version": "1.4.1",
+    "version": "1.4.2",
     "description": "Block tune for Editor.js ",
     "scripts": {
         "build": "webpack --mode production",
