@@ -1,6 +1,7 @@
 import EditorJS from '@editorjs/editorjs'
 import { EDITOR_CLASSES, WRAPPER_ATTRIBUTE_NAME } from './constants'
 import { IndentTuneConfig } from './types'
+import { EditorVersions } from './EditorVersions';
 
 Cypress.Commands.add("interceptConsoleErrors", () => {
     cy.window().then((win) => {
@@ -12,11 +13,14 @@ Cypress.Commands.add("interceptConsoleWarnings", () => {
         cy.spy(win.console, 'warn').as('consoleWarning');
     });
 })
+Cypress.Commands.add("getConsoleErrors", () => {
+    return cy.get("@consoleError")
+})
 Cypress.Commands.add("getConsoleWarnings", () => {
     return cy.get('@consoleWarning')
 })
 Cypress.Commands.add("assertNoConsoleErrors", () => {
-    cy.get('@consoleError').should('not.have.been.called');
+    cy.getConsoleErrors().should('not.have.been.called');
 })
 Cypress.Commands.add('applyBiggerGlobalFontSize', () => {
     cy.get("head").then(head => {
@@ -90,13 +94,47 @@ Cypress.Commands.add("indentBlockUsingToolbar", function (direction: "left" | "r
 })
 
 
+Cypress.Commands.add("applyEditorSelection", (startIndex, endIndex, version) => {
+    const selectedBlockClass = "ce-block--selected"
+    const maxIndex = Math.max(startIndex, endIndex);
+    const minIndex = Math.min(startIndex, endIndex);
+
+    function getBlockElementById(index: number) {
+        return cy.get(`.codex-editor__redactor .ce-block:nth-child(${index + 1})`)
+    }
+
+    //? Important note, in the fixture please add more blocks than selected blocks so it works with v2.22 and down too
+    cy.get(`.codex-editor__redactor .ce-block:not(:nth-child(-n+${maxIndex + 1}):nth-child(n+${minIndex + 1})) [contenteditable]`)
+        .trigger('mousedown')
+        .then(($el) => {
+            const el = $el[0]
+            const document = el.ownerDocument
+            const range = document.createRange()
+            range.selectNodeContents(el)
+            document.getSelection().removeAllRanges()
+            document.getSelection().addRange(range)
+        })
+        .trigger('mouseup')
+    cy.document().then(doc => {
+        doc.getSelection().removeAllRanges();
+    })
+
+
+    for (let i = startIndex; i < endIndex + 1; i++) {
+        getBlockElementById(i).then($block => {
+            $block.addClass(selectedBlockClass)
+        })
+    }
+    cy.get(".codex-editor__redactor").trigger("click").trigger("mouseup")
+})
 declare global {
     namespace Cypress {
         interface Chainable<Subject = any> {
-            // applyEditorSelection(startIndex: number, endIndex: number, version: EditorVersions[keyof EditorVersions]): Cypress.Chainable<void>
+            applyEditorSelection(startIndex: number, endIndex: number, version: EditorVersions[keyof EditorVersions]): Cypress.Chainable<void>
             // applyUnderline(): Cypress.Chainable<void>
             interceptConsoleErrors(): Cypress.Chainable<void>;
             interceptConsoleWarnings(): Cypress.Chainable<void>;
+            getConsoleErrors(): Cypress.Chainable<JQuery<HTMLElement>>;
             assertNoConsoleErrors(): Cypress.Chainable<void>
             getConsoleWarnings(): Cypress.Chainable<JQuery<HTMLElement>>;
             applyBiggerGlobalFontSize(): Cypress.Chainable<void>
