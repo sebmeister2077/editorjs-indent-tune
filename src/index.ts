@@ -561,6 +561,7 @@ export default class IndentTune implements BlockTune {
     }
 
     private alignmentChangeListener(blockId: string, direction: TextDirection) {
+        // across all blocks this function is called, so we got to filter out
         if (blockId !== this.block?.id) return;
         const hasDirectionChanged = direction !== this.config.direction
         if (!hasDirectionChanged) return

@@ -136,7 +136,7 @@ class MyAlignmentTuneClass /* extends maybe other class */ {
 
     private static listeners = new Set()
     public static addChangeListener(listener: (blockId: string, direction: 'ltr' | 'rtl') => void) {
-        MyAlignmentTuneClass.listeners.add(l)
+        MyAlignmentTuneClass.listeners.add(listener)
     }
 
     private onChange(alignment) {

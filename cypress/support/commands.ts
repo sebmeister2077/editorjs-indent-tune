@@ -83,7 +83,9 @@ Cypress.Commands.add("indentBlockUsingToolbar", function (direction: "left" | "r
     const chainableElement = cy.get(`.${EDITOR_CLASSES.ToolbarIndentRoot} [data-tune-indent-${direction}]`);
 
     for (let i = 0; i < amount; i++) {
-        chainableElement.click()
+        chainableElement.click({
+            // force: true
+        })
     }
 })
 
