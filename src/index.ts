@@ -82,7 +82,7 @@ export default class IndentTune implements BlockTune {
     private config: IndentTuneConfigOptions
     public data: IndentData
     private wrapper: HTMLElement = document.createElement('div')
-    private DEFAULT_INDENT_KEY = 'Tab';
+    private DEFAULT_INDENT_KEY = 'Tab' as const;
     constructor({ api, data, config, block, ...other }: BlockToolConstructorOptions<IndentData, IndentTuneConfigOptions>) {
         this.api = api
         this.block = block

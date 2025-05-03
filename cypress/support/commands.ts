@@ -75,6 +75,7 @@ Cypress.Commands.add("getHighlightIndent", { prevSubject: true }, function (prev
 })
 
 Cypress.Commands.add("getIndentLevel", { prevSubject: true }, function (prev: JQuery<HTMLElement>) {
+    cy.log("Returning indent level")
     return cy.wrap(prev).then($el => parseInt($el.attr("data-indent-level")))
 })
 
@@ -94,6 +95,36 @@ Cypress.Commands.add("indentBlockUsingToolbar", function (direction: "left" | "r
 })
 
 
+Cypress.Commands.add("indentUsingKeybord", function (action: "indent" | "unindent", amount: number = 1) {
+    const defaultKey = "Tab";
+
+    cy.window().then(win => {
+        cy.get(`[${WRAPPER_ATTRIBUTE_NAME}]`)
+            // .trigger("keydown", {
+            //     key: defaultKey,
+            //     code: defaultKey,
+            //     bubbles: true,
+            //     shiftKey: action === 'unindent'
+            // })
+            .then(function ($el) {
+                const e = new KeyboardEvent('keydown', {
+                    key: defaultKey,
+                    code: defaultKey,
+                    bubbles: true,
+                    shiftKey: action === 'unindent'
+                });
+                for (let i = 0; i < amount; i++) {
+                    cy.wait(10).then(() => {
+                        $el[0].dispatchEvent(e);
+                    })
+                }
+                cy.log("Trigger keydowns")
+            });
+    })
+
+})
+
+
 Cypress.Commands.add("applyEditorSelection", (startIndex, endIndex, version) => {
     const selectedBlockClass = "ce-block--selected"
     const maxIndex = Math.max(startIndex, endIndex);
@@ -104,7 +135,8 @@ Cypress.Commands.add("applyEditorSelection", (startIndex, endIndex, version) => 
     }
 
     //? Important note, in the fixture please add more blocks than selected blocks so it works with v2.22 and down too
-    cy.get(`.codex-editor__redactor .ce-block:not(:nth-child(-n+${maxIndex + 1}):nth-child(n+${minIndex + 1})) [contenteditable]`)
+    cy.get(`.codex-editor__redactor .ce-block:nth-child(-n+${maxIndex + 1}):nth-child(n+${minIndex + 1}) [contenteditable]`)
+        .last()
         .trigger('mousedown')
         .then(($el) => {
             const el = $el[0]
@@ -144,6 +176,7 @@ declare global {
             getBlockWrapperByIndex(index: number): Cypress.Chainable<WrapperSelector>;
             openToolbarForBlockIndex(index: number): Cypress.Chainable<void>;
             indentBlockUsingToolbar(direction: "left" | "right", amount?: number): Chainable<void>;
+            indentUsingKeybord(action: "indent" | "unindent", amount?: number): Chainable<void>;
             getHighlightIndent: Subject extends undefined ? never : Subject extends BlockSelector ? (() => Cypress.Chainable<JQuery<HTMLElement>>) : never;
             getIndentLevel: Subject extends undefined ? never : Subject extends WrapperSelector ? (() => Cypress.Chainable<number>) : never;
         }
