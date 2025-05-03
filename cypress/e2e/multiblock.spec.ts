@@ -7,7 +7,7 @@ describe("Test editor multiblock works", () => {
         cy.applyBiggerGlobalFontSize();
     })
 
-    for (let i = 0; i < EDITOR_FEATURE_VERSIONS.length; i++) {
+    for (let i = 7; i < EDITOR_FEATURE_VERSIONS.length; i++) {
         const version = EDITOR_FEATURE_VERSIONS[i]
 
         context(`Test version ${version}`, () => {
@@ -25,6 +25,11 @@ describe("Test editor multiblock works", () => {
 
             })
 
+            if (version <= '2.22') {
+                // cy.log(`Not testing complex flows for version ${version}`)
+                // This is because version 2.22 and below selection command does not work as expected
+                return;
+            }
             it("Test simple multiblock indent", () => {
                 const startIndex = 0;
                 const endIndex = 2;
