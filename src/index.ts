@@ -1,4 +1,4 @@
-import EditorJS, { type BlockTune, type API, type BlockAPI } from '@editorjs/editorjs'
+import EditorJS, { type BlockTune, type API, type BlockAPI, BlockAddedMutationType, BlockAddedEvent } from '@editorjs/editorjs'
 import { type BlockToolConstructorOptions, type TunesMenuConfig } from '@editorjs/editorjs/types/tools/index.js'
 import { IconChevronLeft, IconChevronRight } from '@codexteam/icons'
 import './index.css'
@@ -127,9 +127,16 @@ export default class IndentTune implements BlockTune {
 
         window.addEventListener('resize', (e) => this.onResize.call(this, e))
 
-        if (this.shouldApplyAutoIndent) {
+        // this is called after the indent tune constructor is created
+        this.api.events.on("block changed", ({ event }: { event: BlockAddedEvent }) => {
+            const targetId = event.detail.target.id;
+            const currentBlockId = this.block?.id;
+            const isSameTarget = currentBlockId === targetId
+            if (!isSameTarget) return;
+
+            if (!this.shouldApplyAutoIndent) return
             queueMicrotask(() => this.autoIndentBlock())
-        }
+        })
     }
 
 
@@ -292,7 +299,16 @@ export default class IndentTune implements BlockTune {
         if (!this.config.autoIndent) return false
         if (typeof this.config.autoIndent === 'boolean') return this.config.autoIndent;
 
-        return !this.config.autoIndent.tuneNames?.length || this.config.autoIndent.tuneNames.includes(this.block?.name ?? '')
+        // the index is still on the previous block
+        const previousBlockIndex = this.api.blocks.getCurrentBlockIndex()
+        // const previousBlockIndex = currentBlockIndex// - 1;
+        if (previousBlockIndex < 0) return false;
+
+        const previousBlock = this.api.blocks.getBlockByIndex(previousBlockIndex)
+        if (!previousBlock) return false;
+
+        const previousBlockName = previousBlock.name;
+        return !this.config.autoIndent.tuneNames?.length || this.config.autoIndent.tuneNames.includes(previousBlockName)
     }
 
     private onKeyDown(e: KeyboardEvent) {
