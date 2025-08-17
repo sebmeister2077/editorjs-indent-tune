@@ -84,12 +84,18 @@ Cypress.Commands.add("openToolbarForBlockIndex", function (index: number) {
     cy.get(`.${EDITOR_CLASSES.ToolbarSettings}`).should("be.visible").click()
 })
 
-Cypress.Commands.add("indentBlockUsingToolbar", function (direction: "left" | "right", amount: number = 1) {
+Cypress.Commands.add("indentBlockUsingToolbar", function (direction: "left" | "right", amount: number = 1, version?: string) {
     const chainableElement = cy.get(`.${EDITOR_CLASSES.ToolbarIndentRoot} [data-tune-indent-${direction}]`);
 
+    const ignoreWhenNoPointerEvents = version === undefined ? false : (version.startsWith("2.3") || version.startsWith("2.2") && version >= "2.27");
     for (let i = 0; i < amount; i++) {
-        chainableElement.click({
-            // force: true
+        chainableElement.then($el => {
+            const pointerEvents = $el.css("pointer-events")
+            const hasPointerEventsNone = pointerEvents === 'none';
+            if (hasPointerEventsNone && ignoreWhenNoPointerEvents) return;
+            chainableElement.click({
+                // force: true
+            })
         })
     }
 })
@@ -175,7 +181,7 @@ declare global {
             getBlockByIndex(index: number): Cypress.Chainable<BlockSelector>;
             getBlockWrapperByIndex(index: number): Cypress.Chainable<WrapperSelector>;
             openToolbarForBlockIndex(index: number): Cypress.Chainable<void>;
-            indentBlockUsingToolbar(direction: "left" | "right", amount?: number): Chainable<void>;
+            indentBlockUsingToolbar(direction: "left" | "right", amount?: number, version?: string): Chainable<void>;
             indentUsingKeybord(action: "indent" | "unindent", amount?: number): Chainable<void>;
             getHighlightIndent: Subject extends undefined ? never : Subject extends BlockSelector ? (() => Cypress.Chainable<JQuery<HTMLElement>>) : never;
             getIndentLevel: Subject extends undefined ? never : Subject extends WrapperSelector ? (() => Cypress.Chainable<number>) : never;

@@ -17,7 +17,6 @@ describe("Test editor custom block limits", () => {
     for (let i = 0; i < EDITOR_FEATURE_VERSIONS.length; i++) {
         const version = EDITOR_FEATURE_VERSIONS[i];
 
-
         context(`Verify version ${version}`, () => {
 
             it("Give empty limits object", () => {
@@ -34,12 +33,12 @@ describe("Test editor custom block limits", () => {
 
                 cy.openToolbarForBlockIndex(blockIndex);
 
-                cy.indentBlockUsingToolbar("left", 10)
+                cy.indentBlockUsingToolbar("left", 10, version)
 
                 cy.getBlockWrapperByIndex(blockIndex).getIndentLevel()
                 cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", defaultMin)
 
-                cy.indentBlockUsingToolbar("right", 10)
+                cy.indentBlockUsingToolbar("right", 10, version)
                 cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", defaultMax)
 
             })
@@ -60,10 +59,10 @@ describe("Test editor custom block limits", () => {
 
                 cy.openToolbarForBlockIndex(blockIndex);
 
-                cy.indentBlockUsingToolbar("left", 10)
+                cy.indentBlockUsingToolbar("left", 10, version)
                 cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", minIndent)
 
-                cy.indentBlockUsingToolbar("right", 10)
+                cy.indentBlockUsingToolbar("right", 10, version)
                 cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", maxIndent)
             })
 
@@ -85,10 +84,10 @@ describe("Test editor custom block limits", () => {
 
                 cy.openToolbarForBlockIndex(blockIndex);
 
-                cy.indentBlockUsingToolbar("left", indentAmount)
+                cy.indentBlockUsingToolbar("left", indentAmount, version)
                 cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", expectLevel)
 
-                cy.indentBlockUsingToolbar("right", indentAmount)
+                cy.indentBlockUsingToolbar("right", indentAmount, version)
                 cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", defaultMax)
 
 
@@ -111,10 +110,10 @@ describe("Test editor custom block limits", () => {
 
                 cy.openToolbarForBlockIndex(blockIndex);
 
-                cy.indentBlockUsingToolbar("right", indentAmount)
+                cy.indentBlockUsingToolbar("right", indentAmount, version)
                 cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", expectLevel)
 
-                cy.indentBlockUsingToolbar("left", indentAmount)
+                cy.indentBlockUsingToolbar("left", indentAmount, version)
                 cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", defaultMin)
             })
 
@@ -135,10 +134,10 @@ describe("Test editor custom block limits", () => {
 
                 cy.openToolbarForBlockIndex(blockIndex);
 
-                cy.indentBlockUsingToolbar("right", 10)
+                cy.indentBlockUsingToolbar("right", 10, version)
                 cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", maxIndent)
 
-                cy.indentBlockUsingToolbar("left", 10)
+                cy.indentBlockUsingToolbar("left", 10, version)
                 cy.getBlockWrapperByIndex(blockIndex).getIndentLevel().should("eq", minIndent)
             })
 
@@ -163,14 +162,14 @@ describe("Test editor custom block limits", () => {
                 const hIndex = 3;
 
                 cy.openToolbarForBlockIndex(pIndex);
-                cy.indentBlockUsingToolbar("left", 10)
+                cy.indentBlockUsingToolbar("left", 10, version)
                 cy.getBlockWrapperByIndex(pIndex).getIndentLevel().should("eq", minParagraph)
 
                 // uhm i think i need an older header version for older editor
 
                 if (version >= "2.26") {
                     cy.openToolbarForBlockIndex(hIndex);
-                    cy.indentBlockUsingToolbar("right", 10)
+                    cy.indentBlockUsingToolbar("right", 10, version)
                     cy.getBlockWrapperByIndex(hIndex).getIndentLevel().should("eq", maxHeader)
                 }
 
