@@ -7,7 +7,7 @@ describe("Test editor multiblock works", () => {
         cy.applyBiggerGlobalFontSize();
     })
 
-    for (let i = 7; i < EDITOR_FEATURE_VERSIONS.length; i++) {
+    for (let i = 0; i < EDITOR_FEATURE_VERSIONS.length; i++) {
         const version = EDITOR_FEATURE_VERSIONS[i]
 
         context(`Test version ${version}`, () => {
