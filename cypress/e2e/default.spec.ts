@@ -41,7 +41,6 @@ describe("Test editor default functionality", () => {
                 })
             })
 
-            return;
 
             it("The editor toolbar displays the indent option", () => {
                 // Click on the 2nd block toolbar
