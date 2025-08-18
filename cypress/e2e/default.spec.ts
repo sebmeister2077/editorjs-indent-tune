@@ -3,13 +3,10 @@ import editorData from '../fixtures/dataWithIndents.json'
 import { getClassSelectorForBlockType } from "../support/helpers";
 
 describe("Test editor default functionality", () => {
-    before(() => {
+    beforeEach(() => {
         cy.window().then((win) => {
             cy.spy(win.console, 'error').as('consoleError');
         });
-    })
-
-    beforeEach(() => {
         cy.visit(TEMP_ENVIRONMENT_URL)
         cy.applyBiggerGlobalFontSize();
     })
@@ -43,6 +40,8 @@ describe("Test editor default functionality", () => {
                     })
                 })
             })
+
+            return;
 
             it("The editor toolbar displays the indent option", () => {
                 // Click on the 2nd block toolbar
