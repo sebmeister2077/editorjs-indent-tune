@@ -91,6 +91,7 @@ export default class IndentTune implements BlockTune {
     private get rightText();
     private get leftText();
     private get shouldApplyAutoIndent();
+    private handlePropagationForKeyEvent;
     private onKeyDown;
     private handleIndentLeft;
     private handleIndentRight;

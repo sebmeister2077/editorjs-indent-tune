@@ -101,9 +101,9 @@ export default class IndentTune implements BlockTune {
             directionChangeHandler: null,
             version: "2.29",
         }
-        if (!config)
+        if (!config && "settings" in other)
             // for older versions
-            config = (other as any)?.settings ?? {}
+            config = other.settings as any ?? {}
         this.config = {
             ...defaultConfig,
             ...(config ?? {}),
@@ -235,6 +235,8 @@ export default class IndentTune implements BlockTune {
 
         this.applyStylesToWrapper(this.wrapper, this.data.indentLevel)
 
+        // this.wrapper.addEventListener("keypress", this.handlePropagationForKeyEvent.bind(this), { capture: true })
+        // this.wrapper.addEventListener("keyup", this.handlePropagationForKeyEvent.bind(this), { capture: true })
         this.wrapper.addEventListener('keydown', (...args) => this.onKeyDown.apply(this, args), { capture: true })
         this.wrapper.addEventListener("focus", (e) => this.onFocus.call(this, e), { capture: true });
         this.wrapper.addEventListener("blur", (e) => this.onBlur.call(this, e), { capture: true });
@@ -311,19 +313,20 @@ export default class IndentTune implements BlockTune {
         return !this.config.autoIndent.tuneNames?.length || this.config.autoIndent.tuneNames.includes(previousBlockName)
     }
 
-    private onKeyDown(e: KeyboardEvent) {
-        if (!this.block?.id) return;
+    private handlePropagationForKeyEvent(e: KeyboardEvent): { isIndent: boolean } | null {
+        console.log(this)
+        if (!this.block?.id) return null;
         // omit key shortcut entirely
-        if (this.config.handleShortcut === false) return;
+        if (this.config.handleShortcut === false) return null;
 
         const isDefaultKeyPressed = e.key == this.DEFAULT_INDENT_KEY
         const isCustomBehaviourDefined = typeof this.config.handleShortcut === 'function'
 
-        if (!isCustomBehaviourDefined && !isDefaultKeyPressed) return
+        if (!isCustomBehaviourDefined && !isDefaultKeyPressed) return null
 
         const handledCommand = this.config.handleShortcut?.(e, this.block.id)
         const shouldIgnoreKeyPress = !handledCommand && isCustomBehaviourDefined
-        if (shouldIgnoreKeyPress) return
+        if (shouldIgnoreKeyPress) return null
 
         let isIndent: boolean;
         switch (handledCommand) {
@@ -335,12 +338,22 @@ export default class IndentTune implements BlockTune {
                 break;
             case 'default':
             default:
-                if (!isDefaultKeyPressed) return;
+                if (!isDefaultKeyPressed) return null;
                 isIndent = !e.shiftKey
         }
 
         e.stopPropagation()
         e.preventDefault()
+
+        return { isIndent }
+    }
+
+    private onKeyDown(e: KeyboardEvent) {
+        if (!this.block?.id) return;
+
+        const handlingResult = this.handlePropagationForKeyEvent(e)
+        if (!handlingResult) return;
+        const { isIndent } = handlingResult
 
         //this might be still open
         this.api.inlineToolbar.close()
