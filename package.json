@@ -5,7 +5,8 @@
     "scripts": {
         "build": "webpack --mode production",
         "build:dev": "webpack --mode development --watch --output-filename=dev-build.js",
-        "test": "cypress open"
+        "test": "cypress open",
+        "test:headless": "npx cypress run --browser chrome --headless"
     },
     "devDependencies": {
         "@babel/core": "^7.13.14",
