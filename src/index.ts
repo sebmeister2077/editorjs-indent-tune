@@ -314,7 +314,6 @@ export default class IndentTune implements BlockTune {
     }
 
     private handlePropagationForKeyEvent(e: KeyboardEvent): { isIndent: boolean } | null {
-        console.log(this)
         if (!this.block?.id) return null;
         // omit key shortcut entirely
         if (this.config.handleShortcut === false) return null;
