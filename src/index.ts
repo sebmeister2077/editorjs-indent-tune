@@ -99,7 +99,7 @@ export default class IndentTune implements BlockTune {
             handleShortcut: undefined,
             direction: "ltr",
             directionChangeHandler: null,
-            version: "2.29",
+            version: "2.30",
         }
         if (!config && "settings" in other)
             // for older versions
