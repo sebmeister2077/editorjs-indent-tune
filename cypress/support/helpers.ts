@@ -10,3 +10,7 @@ export function getClassSelectorForBlockType(blockType: string) {
 export function isVersionWithPointerEventsNone(version: string) {
     return version >= "2.27"
 }
+
+export function isVersionWhereHeaderBlockIsNotWorking(version: string) {
+    return version < '2.26'
+}

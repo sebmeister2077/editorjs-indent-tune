@@ -48,7 +48,7 @@ describe("Test indent direction", () => {
                 cy.waitForEditorToLoad();
 
                 cy.openToolbarForBlockIndex(blockIndex)
-                cy.indentBlockUsingToolbar("right", indentAmount)
+                cy.indentBlockUsingToolbar("right", indentAmount, version)
 
                 assertDirection(blockIndex, expectedIndentPx, "ltr");
             })
@@ -64,7 +64,7 @@ describe("Test indent direction", () => {
                 const expectedIndentPx = `${defaultIndentSize * indentAmount}px`
 
                 cy.openToolbarForBlockIndex(blockIndex)
-                cy.indentBlockUsingToolbar("left", indentAmount)
+                cy.indentBlockUsingToolbar("left", indentAmount, version)
 
                 assertDirection(blockIndex, expectedIndentPx, direction);
             })
@@ -83,7 +83,7 @@ describe("Test indent direction", () => {
                 const expectedIndentPx = `${defaultIndentSize * indentAmount}px`
 
                 cy.openToolbarForBlockIndex(blockIndex)
-                cy.indentBlockUsingToolbar("right", indentAmount)
+                cy.indentBlockUsingToolbar("right", indentAmount, version)
 
                 assertDirection(blockIndex, expectedIndentPx, direction);
             })
@@ -104,7 +104,7 @@ describe("Test indent direction", () => {
                 cy.waitForEditorToLoad();
                 const expectedIndentPx = `${defaultIndentSize * indentAmount}px`
                 cy.openToolbarForBlockIndex(blockIndex)
-                cy.indentBlockUsingToolbar("right", indentAmount)
+                cy.indentBlockUsingToolbar("right", indentAmount, version)
 
                 function toggleDirection(direction: TextDirection) {
                     for (const l of listeners) {

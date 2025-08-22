@@ -1,6 +1,7 @@
 import { EDITOR_CLASSES, EDITOR_VERSIONS, TEMP_ENVIRONMENT_URL, WRAPPER_ATTRIBUTE_NAME } from "../support/constants"
 import editorData from '../fixtures/dataWithIndents.json'
-import { getClassSelectorForBlockType, isVersionWithPointerEventsNone } from "../support/helpers";
+import { getClassSelectorForBlockType, isVersionWhereHeaderBlockIsNotWorking, isVersionWithPointerEventsNone } from "../support/helpers";
+import { EditorVersions } from "../support/EditorVersions";
 
 describe("Test editor default functionality", () => {
     beforeEach(() => {
@@ -26,8 +27,20 @@ describe("Test editor default functionality", () => {
             })
 
             it("The editor displays the data correctly", () => {
-                cy.get(`[${WRAPPER_ATTRIBUTE_NAME}]`).should("have.length", editorData.blocks.length,)
-                editorData.blocks.forEach((block, index) => {
+                const versionsWhereTuneWontBeAppliedToNonIndentedBlocks = ['2.20.1'];
+
+                // if block.tune.indentLevel is non existent then it wont be applied
+                const isVerionWhereTuneWontBeAppliedToNonIndentedBlocks = versionsWhereTuneWontBeAppliedToNonIndentedBlocks.includes(version)
+                let expectedBlockWrappers = editorData.blocks.length
+                if (isVerionWhereTuneWontBeAppliedToNonIndentedBlocks) {
+                    expectedBlockWrappers = editorData.blocks.filter(b => b.tunes.indentTune).length;
+                }
+                cy.get(`[${WRAPPER_ATTRIBUTE_NAME}]`).should("have.length", expectedBlockWrappers)
+
+                editorData.blocks.forEach((block) => {
+                    if (isVerionWhereTuneWontBeAppliedToNonIndentedBlocks && !block.tunes.indentTune) return;
+                    if (isVersionWhereHeaderBlockIsNotWorking(version) && block.type === 'header') return;
+                    const index = editorData.blocks.indexOf(block)
                     cy.getBlockByIndex(index).then($block => {
                         const $contentEl = $block.find(getClassSelectorForBlockType(block.type));
                         const innerHtml = $contentEl.html()
@@ -62,7 +75,7 @@ describe("Test editor default functionality", () => {
 
                 cy.openToolbarForBlockIndex(blockIndex);
 
-                cy.indentBlockUsingToolbar("right", indentAmount)
+                cy.indentBlockUsingToolbar("right", indentAmount, version)
 
 
                 cy.getBlockWrapperByIndex(blockIndex).then($blockWrapper => {
@@ -92,7 +105,7 @@ describe("Test editor default functionality", () => {
                 else
                     cy.get(`.${EDITOR_CLASSES.ToolbarIndentRoot} [data-tune-indent-left]`).should("have.css", "cursor", 'pointer')
 
-                cy.indentBlockUsingToolbar("right", indentIntervalSize)
+                cy.indentBlockUsingToolbar("right", indentIntervalSize, version)
                 if (isVersionWithPointerEventsNone(version))
                     cy.get(`.${EDITOR_CLASSES.ToolbarIndentRoot} [data-tune-indent-right]`).should("have.css", "pointer-events", 'none')
                 else
@@ -104,7 +117,7 @@ describe("Test editor default functionality", () => {
                 })
 
 
-                cy.indentBlockUsingToolbar("left", indentIntervalSize)
+                cy.indentBlockUsingToolbar("left", indentIntervalSize, version)
 
                 if (isVersionWithPointerEventsNone(version))
                     cy.get(`.${EDITOR_CLASSES.ToolbarIndentRoot} [data-tune-indent-left]`).should("have.css", "pointer-events", 'none')
