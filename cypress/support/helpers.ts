@@ -6,3 +6,7 @@ export function getClassSelectorForBlockType(blockType: string) {
             return '.ce-header'
     }
 }
+
+export function isVersionWithPointerEventsNone(version: string) {
+    return version >= "2.27"
+}
