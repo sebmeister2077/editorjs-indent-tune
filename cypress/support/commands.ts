@@ -58,6 +58,16 @@ Cypress.Commands.add("waitForEditorToLoad", () => {
         })
     })
 })
+Cypress.Commands.add("waitForEditorSaveEvent", () => {
+    return cy.window().then(win => {
+        return new Cypress.Promise<any>((res, rej) => {
+            win.addEventListener("save-editor-data", (e) => {
+
+                res(((e as CustomEvent).detail))
+            })
+        })
+    })
+})
 
 Cypress.Commands.add("getBlockByIndex", function (index: number) {
     return cy.document().then(function (doc) {
@@ -178,6 +188,8 @@ declare global {
             applyBiggerGlobalFontSize(): Cypress.Chainable<void>
             loadEditorJsVersion(version: string, data: any, config?: IndentTuneConfig, editorConfig?: Object): Cypress.Chainable<void>;
             waitForEditorToLoad(): Cypress.Chainable<void>;
+            waitForEditorSaveEvent(): Cypress.Chainable<{ data: Object; changes?: any }>;
+
             getBlockByIndex(index: number): Cypress.Chainable<BlockSelector>;
             getBlockWrapperByIndex(index: number): Cypress.Chainable<WrapperSelector>;
             openToolbarForBlockIndex(index: number): Cypress.Chainable<void>;

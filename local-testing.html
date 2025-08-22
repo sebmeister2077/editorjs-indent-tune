@@ -6,7 +6,7 @@
         <title>Test indent</title>
         <script>
             if (!globalThis.Cypress) {
-                window.editorVersion = '2.30'
+                window.editorVersion = '2.22'
                 document.writeln(
                     `<script onload="window.dispatchEvent(new CustomEvent('loadded-editorjs-script'));" src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@${window.editorVersion}"><\/script>`,
                 )
@@ -93,7 +93,7 @@ https://cdn.jsdelivr.net/npm/@editorjs/list@1.10.0/dist/list.umd.min.js
 
                 const editor = new EditorJS({
                     holder: 'editor',
-                    tunes: ['alignmentTune', 'indentTune'],
+                    tunes: ['indentTune', 'alignmentTune'],
                     tools: {
                         list: {
                             class: self.List,
@@ -109,11 +109,16 @@ https://cdn.jsdelivr.net/npm/@editorjs/list@1.10.0/dist/list.umd.min.js
                     },
                     ...editorConfig,
                     // readOnly: true,
-                    // onChange(api) {
-                    //     api.saver.save().then((data) => {
-                    //         localStorage.setItem(dataLocation, JSON.stringify(data))
-                    //     })
-                    // },
+                    onChange(api, changes) {
+                        const isDefaultTest = globalThis.Cypress?.spec?.fileName === 'default'
+                        if (globalThis.Cypress && !isDefaultTest) {
+                            return
+                        }
+                        api.saver.save().then((data) => {
+                            if (isDefaultTest) window.dispatchEvent(new CustomEvent('save-editor-data', { detail: { data, changes } }))
+                            localStorage.setItem(dataLocation, JSON.stringify(data))
+                        })
+                    },
                     data: editorData,
                 })
                 window.editor = editor

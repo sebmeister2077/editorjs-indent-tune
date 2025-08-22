@@ -11,7 +11,7 @@ describe("Test editor default functionality", () => {
         cy.applyBiggerGlobalFontSize();
     })
 
-    for (let i = 0; i < 1 && EDITOR_VERSIONS.length; i++) {
+    for (let i = 0; i < EDITOR_VERSIONS.length; i++) {
         const version = EDITOR_VERSIONS[i];
 
 
@@ -21,64 +21,64 @@ describe("Test editor default functionality", () => {
                 cy.waitForEditorToLoad();
             })
 
-            // it("The editor loads correctly without errors", () => {
-            //     cy.get('@consoleError').should('not.have.been.called');
-            // })
+            it("The editor loads correctly without errors", () => {
+                cy.get('@consoleError').should('not.have.been.called');
+            })
 
-            // it("The editor displays the data correctly", () => {
-            //     cy.get(`[${WRAPPER_ATTRIBUTE_NAME}]`).should("have.length", editorData.blocks.length,)
-            //     editorData.blocks.forEach((block, index) => {
-            //         cy.getBlockByIndex(index).then($block => {
-            //             const $contentEl = $block.find(getClassSelectorForBlockType(block.type));
-            //             const innerHtml = $contentEl.html()
-            //             const displayedIndentLevel = $block.find(`[${WRAPPER_ATTRIBUTE_NAME}]`).attr(WRAPPER_ATTRIBUTE_NAME)
+            it("The editor displays the data correctly", () => {
+                cy.get(`[${WRAPPER_ATTRIBUTE_NAME}]`).should("have.length", editorData.blocks.length,)
+                editorData.blocks.forEach((block, index) => {
+                    cy.getBlockByIndex(index).then($block => {
+                        const $contentEl = $block.find(getClassSelectorForBlockType(block.type));
+                        const innerHtml = $contentEl.html()
+                        const displayedIndentLevel = $block.find(`[${WRAPPER_ATTRIBUTE_NAME}]`).attr(WRAPPER_ATTRIBUTE_NAME)
 
-            //             expect(innerHtml).to.eq(block.data.text)
-            //             if (block.data.level !== undefined) {
-            //                 expect(displayedIndentLevel).to.eq(block.data.level.toString())
-            //             }
-            //         })
-            //     })
-            // })
-
-
-            // it("The editor toolbar displays the indent option", () => {
-            //     // Click on the 2nd block toolbar
-            //     cy.openToolbarForBlockIndex(1);
-
-            //     cy.get(`.${EDITOR_CLASSES.ToolbarIndentRoot}`).should("be.visible").should("include.text", 'Indent');
-            //     cy.get(`.${EDITOR_CLASSES.ToolbarIndentRoot}`).children("[data-tune-indent-left]").should("be.visible")
-            //     cy.get(`.${EDITOR_CLASSES.ToolbarIndentRoot}`).children("[data-tune-indent-right]").should("be.visible")
-
-            // })
-
-            // it("I want to be able to indent a paragraph", () => {
-            //     const blockIndex = 1;
-            //     const indentAmount = 3;
-            //     const initialLevel = editorData.blocks[blockIndex].data.level ?? 0;
-            //     const expectLevel = initialLevel + indentAmount;
-            //     const defaultIndentSize = 24
-            //     const expectedIndentSize = (defaultIndentSize * expectLevel * 2) + "px"
-
-            //     cy.openToolbarForBlockIndex(blockIndex);
-
-            //     cy.indentBlockUsingToolbar("right", indentAmount)
+                        expect(innerHtml).to.eq(block.data.text)
+                        if (block.data.level !== undefined) {
+                            expect(displayedIndentLevel).to.eq(block.data.level.toString())
+                        }
+                    })
+                })
+            })
 
 
-            //     cy.getBlockWrapperByIndex(blockIndex).then($blockWrapper => {
+            it("The editor toolbar displays the indent option", () => {
+                // Click on the 2nd block toolbar
+                cy.openToolbarForBlockIndex(1);
 
-            //         cy.wrap($blockWrapper).should("have.attr", WRAPPER_ATTRIBUTE_NAME)
+                cy.get(`.${EDITOR_CLASSES.ToolbarIndentRoot}`).should("be.visible").should("include.text", 'Indent');
+                cy.get(`.${EDITOR_CLASSES.ToolbarIndentRoot}`).children("[data-tune-indent-left]").should("be.visible")
+                cy.get(`.${EDITOR_CLASSES.ToolbarIndentRoot}`).children("[data-tune-indent-right]").should("be.visible")
 
-            //         const displayedIndentLevel = $blockWrapper.attr(WRAPPER_ATTRIBUTE_NAME)
-            //         expect(displayedIndentLevel).to.eq((expectLevel).toString())
-            //         cy.window().then(win => {
-            //             const { paddingLeft } = win.getComputedStyle($blockWrapper[0]);
-            //             expect(paddingLeft).to.eq(expectedIndentSize, 'Expect visual indentation on paragraph')
-            //         })
+            })
 
-            //     })
+            it("I want to be able to indent a paragraph", () => {
+                const blockIndex = 1;
+                const indentAmount = 3;
+                const initialLevel = editorData.blocks[blockIndex].data.level ?? 0;
+                const expectLevel = initialLevel + indentAmount;
+                const defaultIndentSize = 24
+                const expectedIndentSize = (defaultIndentSize * expectLevel * 2) + "px"
 
-            // })
+                cy.openToolbarForBlockIndex(blockIndex);
+
+                cy.indentBlockUsingToolbar("right", indentAmount)
+
+
+                cy.getBlockWrapperByIndex(blockIndex).then($blockWrapper => {
+
+                    cy.wrap($blockWrapper).should("have.attr", WRAPPER_ATTRIBUTE_NAME)
+
+                    const displayedIndentLevel = $blockWrapper.attr(WRAPPER_ATTRIBUTE_NAME)
+                    expect(displayedIndentLevel).to.eq((expectLevel).toString())
+                    cy.window().then(win => {
+                        const { paddingLeft } = win.getComputedStyle($blockWrapper[0]);
+                        expect(paddingLeft).to.eq(expectedIndentSize, 'Expect visual indentation on paragraph')
+                    })
+
+                })
+
+            })
 
             it("Test out the default indent limits", () => {
                 const defaultMinLimit = 0;
@@ -117,20 +117,33 @@ describe("Test editor default functionality", () => {
                 })
 
             })
+            if (version < "2.22") return
 
             it("Test out saving of data", () => {
                 const blockIndex = 1;
                 const amonudToIndent = 2;
-                const expectectedIndent = editorData.blocks[blockIndex]
 
                 cy.openToolbarForBlockIndex(blockIndex);
                 cy.indentBlockUsingToolbar("right", amonudToIndent, version);
 
-                cy.window().then(win => {
-                    win.addEventListener("save-editor-data", (e) => {
+                cy.waitForEditorSaveEvent().then((res) => {
+                    expect(res.data).to.have.property("blocks").that.is.an("array");
+                    if (!("blocks" in res.data)) return;
+
+                    const blocks = res.data.blocks as any[]
+
+                    expect(blocks).have.length(editorData.blocks.length);
+                    blocks.forEach((block, idx) => {
+                        const previousBlockIndex = editorData.blocks[idx].tunes.indentTune?.indentLevel ?? 0;
+                        if (idx == blockIndex)
+                            expect(block.tunes.indentTune.indentLevel).to.eq(previousBlockIndex + amonudToIndent)
+                        else
+                            expect(block.tunes.indentTune.indentLevel).to.eq(previousBlockIndex)
 
                     })
+
                 })
+
             })
 
         })
