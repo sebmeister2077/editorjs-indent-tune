@@ -11,38 +11,44 @@ describe("Test editor auto indent", () => {
     afterEach(() => {
         cy.assertNoConsoleErrors()
     })
-    for (let i = 0; i < 1 && 1 < EDITOR_FEATURE_VERSIONS.length; i++) {
+    for (let i = 0; i < EDITOR_FEATURE_VERSIONS.length; i++) {
         const version = EDITOR_FEATURE_VERSIONS[i]
 
         context(`Test version ${version}`, () => {
 
             it("Test default config without autoindent", () => {
+                const firstBlockIndexWithIndent = editorData.blocks.findIndex(b => b.data.level > 0);
                 cy.loadEditorJsVersion(version, editorData, {
                 })
                 cy.waitForEditorToLoad()
+
+                cy.getBlockByIndex(firstBlockIndexWithIndent).find("[contenteditable]")
+                    .click()
+                    .type("{enter}")
+
+                cy.getBlockWrapperByIndex(firstBlockIndexWithIndent + 1).getIndentLevel().then(level => {
+                    cy.wrap(level).should("equal", 0)
+                })
+                cy.get(`.${EDITOR_CLASSES.BaseBlock}`).should("have.length", editorData.blocks.length + 1)
+            })
+
+            it("Test default config with autoindent on false", () => {
                 const firstBlockIndexWithIndent = editorData.blocks.findIndex(b => b.data.level > 0);
-
-                executeTestCase()
-
-                cy.reload()
                 cy.loadEditorJsVersion(version, editorData, {
                     autoIndent: false
                 })
                 cy.waitForEditorToLoad()
 
-                executeTestCase()
+                cy.getBlockByIndex(firstBlockIndexWithIndent).find("[contenteditable]")
+                    .click()
+                    .type("{enter}")
 
-                function executeTestCase() {
-                    cy.getBlockByIndex(firstBlockIndexWithIndent).find("[contenteditable]")
-                        .click()
-                        .type("{enter}")
-
-                    cy.getBlockWrapperByIndex(firstBlockIndexWithIndent + 1).getIndentLevel().then(level => {
-                        cy.wrap(level).should("equal", 0)
-                    })
-                    cy.get(`.${EDITOR_CLASSES.BaseBlock}`).should("have.length", editorData.blocks.length + 1)
-                }
+                cy.getBlockWrapperByIndex(firstBlockIndexWithIndent + 1).getIndentLevel().then(level => {
+                    cy.wrap(level).should("equal", 0)
+                })
+                cy.get(`.${EDITOR_CLASSES.BaseBlock}`).should("have.length", editorData.blocks.length + 1)
             })
+
 
 
             it("I expect to autoindent all blocks", () => {
@@ -51,7 +57,8 @@ describe("Test editor auto indent", () => {
                 })
                 cy.waitForEditorToLoad()
                 const firstBlockIndexWithIndent = editorData.blocks.findIndex(b => b.data.level > 0);
-                cy.getBlockByIndex(firstBlockIndexWithIndent).find("[contenteditable]")
+                cy.getBlockByIndex(firstBlockIndexWithIndent)
+                    .find("[contenteditable]")
                     .click()
                     .type("{enter}")
 

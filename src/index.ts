@@ -116,6 +116,7 @@ export default class IndentTune implements BlockTune {
         }
 
         const defaultIndentLevel = this.config.customBlockIndentLimits[this.block?.name ?? '']?.min ?? this.config.minIndent
+        let isDataEmptyAtInit = data === undefined;
         this.data = {
             //@ts-ignore
             indentLevel: defaultIndentLevel,
@@ -127,16 +128,27 @@ export default class IndentTune implements BlockTune {
 
         window.addEventListener('resize', (e) => this.onResize.call(this, e))
 
-        // this is called after the indent tune constructor is created
+        const autoIndentVerifier = () => {
+            if (!this.shouldApplyAutoIndent(isDataEmptyAtInit)) return
+
+            queueMicrotask(() => {
+                this.autoIndentBlock()
+                isDataEmptyAtInit = false;
+            })
+        }
+        // this is called after the indent tune constructor is created (in v2.27 and above)
         this.api.events.on("block changed", ({ event }: { event: BlockAddedEvent }) => {
             const targetId = event.detail.target.id;
             const currentBlockId = this.block?.id;
             const isSameTarget = currentBlockId === targetId
             if (!isSameTarget) return;
 
-            if (!this.shouldApplyAutoIndent) return
-            queueMicrotask(() => this.autoIndentBlock())
+            autoIndentVerifier();
         })
+
+        if (this.config.version && parseFloat(this.config.version) <= 2.26)
+            autoIndentVerifier();
+
     }
 
 
@@ -297,9 +309,13 @@ export default class IndentTune implements BlockTune {
         return this.api.i18n.t(this.isDirectionInverted ? 'Indent' : 'Un Indent')
     }
 
-    private get shouldApplyAutoIndent(): boolean {
+    private shouldApplyAutoIndent(isDataEmptyAtInit: boolean): boolean {
+        console.log("🚀 ~ IndentTune ~ shouldApplyAutoIndent ~ shouldApplyAutoIndent:", isDataEmptyAtInit)
         if (!this.config.autoIndent) return false
-        if (typeof this.config.autoIndent === 'boolean') return this.config.autoIndent;
+        // if the block is already indented, do not auto indent
+        if (!isDataEmptyAtInit) return false;
+        if (typeof this.config.autoIndent === 'boolean')
+            return this.config.autoIndent;
 
         // the index is still on the previous block
         const previousBlockIndex = this.api.blocks.getCurrentBlockIndex()
@@ -433,7 +449,8 @@ export default class IndentTune implements BlockTune {
     }
 
     private autoIndentBlock() {
-        const currentBlockIndex = this.api.blocks.getBlockIndex(this.block!.id)
+        const currentBlockIndex = this.getCurrentBlockIndex()
+        if (currentBlockIndex === null) return;
         const previousBlock = this.api.blocks.getBlockByIndex(currentBlockIndex - 1)
 
         if (!previousBlock) return
@@ -610,6 +627,26 @@ export default class IndentTune implements BlockTune {
 
     private createElementFromTemplate(template: string): HTMLElement {
         return new DOMParser().parseFromString(template, 'text/html').body.firstChild as HTMLElement;
+    }
+
+    // for older versions (below v2.22 i think)
+    private getCurrentBlockIndex(): number | null {
+        if (!this.block) return null;
+
+        try {
+            return this.api.blocks.getBlockIndex(this.block.id)
+        } catch {
+
+        }
+        let previousSiblings = 0;
+        let currentElement: HTMLElement | null = this.block.holder;
+
+        while (currentElement && currentElement.previousElementSibling) {
+            previousSiblings++;
+            currentElement = currentElement.previousElementSibling as HTMLElement;
+        }
+
+        return previousSiblings;
     }
 
     // private omitTransitionTemporarily(element: HTMLElement) {

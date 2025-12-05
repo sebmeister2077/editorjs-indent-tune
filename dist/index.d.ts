@@ -90,7 +90,7 @@ export default class IndentTune implements BlockTune {
     private get isDirectionInverted();
     private get rightText();
     private get leftText();
-    private get shouldApplyAutoIndent();
+    private shouldApplyAutoIndent;
     private handlePropagationForKeyEvent;
     private onKeyDown;
     private handleIndentLeft;
@@ -112,6 +112,7 @@ export default class IndentTune implements BlockTune {
     private getBlockForWrapper;
     private alignmentChangeListener;
     private createElementFromTemplate;
+    private getCurrentBlockIndex;
     private changeConfigBasedOnVersionIfNeeded;
     private cachedMaxWidthForContent;
     private maxWidthForContent;
