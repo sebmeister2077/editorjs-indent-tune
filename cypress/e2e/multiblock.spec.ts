@@ -45,6 +45,7 @@ describe("Test editor multiblock works", () => {
                 cy.applyEditorSelection(startIndex, endIndex, version)
 
                 cy.indentUsingKeybord("indent", indentAmount)
+                cy.wait(50); // wait for indent to apply
                 for (let i = startIndex; i <= endIndex; i++) {
 
                     cy.getBlockWrapperByIndex(i).getIndentLevel().then(level => {
