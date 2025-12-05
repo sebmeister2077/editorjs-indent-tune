@@ -310,7 +310,6 @@ export default class IndentTune implements BlockTune {
     }
 
     private shouldApplyAutoIndent(isDataEmptyAtInit: boolean): boolean {
-        console.log("🚀 ~ IndentTune ~ shouldApplyAutoIndent ~ shouldApplyAutoIndent:", isDataEmptyAtInit)
         if (!this.config.autoIndent) return false
         // if the block is already indented, do not auto indent
         if (!isDataEmptyAtInit) return false;

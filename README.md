@@ -1,18 +1,20 @@
 # EditorJS Indent Tune
 
-Indent feature for [Editor.js](https://editorjs.io).
+Indentation support for [Editor.js](https://editorjs.io) blocks.
+
+`editorjs-indent-tune` adds **indent** / **unindent controls**, keyboard shortcuts, auto-indent, visual highlighting, RTL/LTR support, and optional multi-block indentation.
 
 ![example](./assets/example1.gif)
 
 ## Instalation
 
-### Install via NPM
+### NPM
 
 ```shell
 npm i editorjs-indent-tune
 ```
 
-### Load from CDN
+### CDN
 
 Require this script on a page with Editor.js.
 
@@ -20,61 +22,68 @@ Require this script on a page with Editor.js.
 <script src="https://cdn.jsdelivr.net/npm/editorjs-indent-tune/dist/bundle.js"><script>
 ```
 
-## Usage
+## Basic Usage
 
 ```js
 import EditorJS from '@editorjs/editorjs'
 import IndentTune from 'editorjs-indent-tune'
 
-/**
- * Editor.js configuration
- */
 const editor = new EditorJS({
-    /**
-     * Connect tool
-     */
     tools: {
         indentTune: {
                 class: IndentTune,
-                // recommended for version based style adjustments
+                // Recommended: pass Editor.js version for style & older compatibility
                 version: EditorJS.version,
             },
     },
-
-    /**
-     * Apply to all the blocks
-     */
+     // Apply indent tune globally
     tunes: ['indentTune'],
-
-    // ...
 })
 ```
 
-You can disable this tune for a specific block by not adding it in the tunes array
+That’s it 🎉
+No extra configuration is required — all other options are **fully optional** and can be added later as needed.
+
+### What This Does
+
+- Enables indent / unindent controls
+- Adds keyboard shortcuts (Tab / Shift + Tab)
+- Works for all blocks by default
+- Respects built-in indent limits
+
+## Enable / Disable Per Block
+
+If you **don’t** want indentation for a specific block, simply omit the tune from that block’s `tunes` list.
 
 ```js
 const editor = new EditorJS({
     tools: {
-        someOtherTool: {
-            //...
+        paragraph: {
+            class: Paragraph,
             tunes: [
-                /* all other tunes except those you dont want*/
+                // intentionally no indentTune
             ],
         },
     },
 })
 ```
 
-Apply a indent highlight
+## Highlight Indent Level
+
+You can visually highlight the indent area when a block is focused.
+
+### CSS
 
 ```css
 .indentHighlight {
-    transition: background-color 0.4s;
+    transition: background-color 0.4s ease;
 }
 [data-block-indent-wrapper][data-focused] .indentHighlight {
-    background-color: red;
+    background-color: rgba(255, 0, 0, 0.1);
 }
 ```
+
+### Config
 
 ```js
 const editor = new EditorJS({
@@ -91,93 +100,191 @@ const editor = new EditorJS({
 })
 ```
 
-Complete example:
+## Complete Example (TypeScript)
 
 ```js
+import EditorJS from '@editorjs/editorjs'
 import IndentTune, { type IndentTuneConfig } from 'editorjs-indent-tune'
 
 const editor = new EditorJS({
     tools: {
-
-        someOtherBlock: {
-            //...
+        paragraph: {
+            class: Paragraph,
         },
         indentTune: {
             class: IndentTune,
             config: {
                 version: EditorJS.version,
-                customBlockIndentLimits: {
-                    someOtherBlock: { max: 5 },
-                },
-                maxIndent: 10,
+
                 indentSize: 30,
+                maxIndent: 10,
+                minIndent: 0,
+
                 multiblock: true,
                 tuneName: 'indentTune',
-                // If you use typescript
+
+                customBlockIndentLimits: {
+                paragraph: { max: 5 },
+                },
             } as IndentTuneConfig,
         },
     },
 })
 ```
 
-### What if my editor also has a text alignment tune?
+## Keyboard Shortcuts
 
-You can use the `directionChangeHandler` config field for that.
+By default, **EditorJS Indent Tune** enables keyboard-based indentation.
 
-Here is one solution:
+### Default Behavior
+
+| Shortcut | Action |
+|-|-|
+| `Tab` | Indent block |
+| `Shift + Tab` | Unindent block |
+
+✅ Works on the currently focused block
+✅ Supports multi-block selection if multiblock is enabled
+✅ Automatically respects minIndent / maxIndent limits
+
+### Custom Keyboard Handling
+
+You can override the default keyboard behavior using the `handleShortcut` option.
 
 ```ts
-class MyAlignmentTuneClass /* extends maybe other class */ {
-    private block
-    constructor({ block }) {
-        this.block = block
-        // ...
-    }
+handleShortcut?: (
+  e: KeyboardEvent,
+  blockId: string
+) => 'indent' | 'unindent' | 'default' | void
+```
 
-    private static listeners = new Set()
-    public static addChangeListener(listener: (blockId: string, direction: 'ltr' | 'rtl') => void) {
-        MyAlignmentTuneClass.listeners.add(listener)
-    }
+#### Interpretation
 
-    private onChange(alignment) {
-        //...
-        MyAlignmentTuneClass.listeners.forEach((l) => l(this.block.id, alignment == 'left' ? 'ltr' : 'rtl'))
-        //...
-    }
+| Return value | Effect |
+|-|-|
+| `'indent'` | Forces indentation |
+| `'unindent'` | Forces un-indentation |
+| `'default'` | Uses built-in behavior |
+| `undefined` | Uses build-in behavior |
+| `false` (as config value) | Disabled shortcuts completely |
 
-    public wrap(blockContent) {
-        //...
-        AlignmentBlockTune.listeners.forEach((l) => l(this.block.id, this.data.alignment == 'left' ? 'ltr' : 'rtl'))
-        //...
-    }
+#### Example: Custom Shortcut Logic
+
+```ts
+const editor = new EditorJS({
+  tools: {
+    indentTune: {
+      class: IndentTune,
+      config: {
+        handleShortcut(e, blockId) {
+          // Use Ctrl + ] / Ctrl + [
+          if (e.ctrlKey && e.key === ']') return 'indent'
+          if (e.ctrlKey && e.key === '[') return 'unindent'
+
+          return 'default'
+        },
+      },
+    },
+  },
+})
+```
+
+#### Notes
+
+- Auto-indent and keyboard indent respect block-specific limits
+- Direction (ltr / rtl) does not affect shortcut logic — only visual placement
+
+### Using With an Alignment Tune (RTL / LTR)
+
+If your editor also supports **text alignment**, you may want indentation to react to direction changes (LTR ↔ RTL).
+This can be done using `directionChangeHandler`.
+
+### Example Alignment Tune
+
+```ts
+class MyAlignmentTune {
+  private block
+
+  constructor({ block }) {
+    this.block = block
+  }
+
+  private static listeners = new Set<
+    (blockId: string, direction: 'ltr' | 'rtl') => void
+  >()
+
+  static addChangeListener(
+    listener: (blockId: string, direction: 'ltr' | 'rtl') => void
+  ) {
+    MyAlignmentTune.listeners.add(listener)
+  }
+
+  private onChange(alignment: 'left' | 'right') {
+    const direction = alignment === 'left' ? 'ltr' : 'rtl'
+    MyAlignmentTune.listeners.forEach(l =>
+      l(this.block.id, direction)
+    )
+  }
+
+  wrap(blockContent: HTMLElement) {
+    const direction = this.data.alignment === 'left' ? 'ltr' : 'rtl'
+    MyAlignmentTune.listeners.forEach(l =>
+      l(this.block.id, direction)
+    )
+    return blockContent
+  }
 }
+```
+
+### Editor Setup
+
+```js
 
 const editor = new EditorJS({
     tools: {
         alignmentTune: {
-            class: MyAlignmentTuneClass,
+            class: MyAlignmentTune,
         },
         indentTune: {
             class: IndentTune,
             config: {
-                directionChangeHandler: MyAlignmentTuneClass.addChangeListener,
+                directionChangeHandler: MyAlignmentTune.addChangeListener,
             },
         },
     },
 })
 ```
 
-You're free to use whatever implementation you wish.
+✅ You’re free to implement this however you prefer — this is just one approach.
 
-### Select elements
+## Selecting Indent Elements (DOM)
 
-Selection of the **IndentTuneWrapper** can be done (in JS) using `[${IndentTune.DATA_WRAPPER_NAME}]` selector
+These static constants are exposed for easier quering:
 
-Selection of the **Focused** state for the **IndentTuneWrapper** can be achieved (in JS) using `[${IndentTune.DATA_FOCUSED}]` selector
+```ts
+IndentTune.DATA_WRAPPER_NAME
+IndentTune.DATA_FOCUSED
+IndentTune.DATA_INDENT_LEVEL
 
-Selection of the **IndentLevel** can be accesed from the `IndentTune.DATA_INDENT_LEVEL` attribute
+```
 
-## Config Params (optional)
+### Examples
+
+```ts
+// Wrapper
+document.querySelector(`[${IndentTune.DATA_WRAPPER_NAME}]`)
+
+// Focused wrapper
+document.querySelector(`[${IndentTune.DATA_FOCUSED}]`)
+
+// Indent level
+element.getAttribute(IndentTune.DATA_INDENT_LEVEL)
+
+```
+
+## Configuration Options
+
+All config fields are optional.
 
 | Field                   | Type                                                                                                       | Description                                                                                                                                                                                                                                                               | Default      |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
