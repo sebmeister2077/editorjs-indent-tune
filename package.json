@@ -6,7 +6,8 @@
         "build": "webpack --mode production",
         "build:dev": "webpack --mode development --watch --output-filename=dev-build.js",
         "test": "cypress open",
-        "test:headless": "npx cypress run --browser chrome --headless"
+        "test:headless": "npx cypress run --browser chrome --headless",
+        "test:file": "npx cypress run --spec 'cypress/e2e/multiblock.spec.ts' --browser chrome --headless"
     },
     "devDependencies": {
         "@babel/core": "^7.13.14",
@@ -14,7 +15,7 @@
         "@editorjs/editorjs": "^2.28.2",
         "babel-loader": "^8.2.2",
         "css-loader": "^5.2.7",
-        "cypress": "^13.17.0",
+        "cypress": "^15.7.1",
         "raw-loader": "^4.0.2",
         "style-loader": "^2.0.0",
         "ts-loader": "^9.5.1",
