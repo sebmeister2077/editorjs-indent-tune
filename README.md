@@ -144,7 +144,9 @@ By default, **EditorJS Indent Tune** enables keyboard-based indentation.
 | `Shift + Tab` | Unindent block |
 
 ✅ Works on the currently focused block
+
 ✅ Supports multi-block selection if multiblock is enabled
+
 ✅ Automatically respects minIndent / maxIndent limits
 
 ### Custom Keyboard Handling
